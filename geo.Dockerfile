@@ -51,8 +51,8 @@ RUN apt-get update \
 # Install tarpaulin
 RUN cargo install cargo-tarpaulin
 
+# Copy PROJ artifacts from proj_builder
 COPY --from=proj_builder /build/usr/share/proj/ /usr/share/proj/
 COPY --from=proj_builder /build/usr/include/ /usr/include/
 COPY --from=proj_builder /build/usr/bin/ /usr/bin/
 COPY --from=proj_builder /build/usr/lib/ /usr/lib/
-
