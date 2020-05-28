@@ -1,3 +1,5 @@
+# https://hub.docker.com/orgs/georust/geo-ci
+
 FROM ubuntu:20.04
 
 # Install Rust
@@ -20,10 +22,14 @@ RUN apt-get update \
     wget \
   && rm -rf /var/lib/apt/lists/*
 
+# Install Tarpaulin dependencies
+RUN apt-get update \
+  && DEBIAN_FRONTEND="noninteractive" apt-get install -y \
+    libssl-dev \
+  && rm -rf /var/lib/apt/lists/*
+
 # Install tarpaulin
 RUN cargo install cargo-tarpaulin
-
-RUN cargo tarpaulin
 
 # Install PROJ dependencies
 RUN apt-get update \
