@@ -22,9 +22,9 @@ RUN apt-get update \
     wget
 
 # Compile and install
-RUN wget https://github.com/OSGeo/PROJ/releases/download/7.0.0/proj-7.0.0.tar.gz \
-  && tar -xzvf proj-7.0.0.tar.gz \
-  && cd proj-7.0.0 \
+RUN wget https://github.com/OSGeo/PROJ/releases/download/7.0.1/proj-7.0.1.tar.gz \
+  && tar -xzvf proj-7.0.1.tar.gz \
+  && cd proj-7.0.1 \
   && ./configure --disable-dependency-tracking --prefix=/usr \
   && make \
   && make install
@@ -55,3 +55,4 @@ COPY --from=proj_builder /build/usr/share/proj/ /usr/share/proj/
 COPY --from=proj_builder /build/usr/include/ /usr/include/
 COPY --from=proj_builder /build/usr/bin/ /usr/bin/
 COPY --from=proj_builder /build/usr/lib/ /usr/lib/
+
