@@ -30,29 +30,24 @@ RUN wget https://github.com/OSGeo/PROJ/releases/download/7.0.1/proj-7.0.1.tar.gz
   && make install
 
 # ------------------------------------------------------------------------------
+# tarpaulin build stage
+# ------------------------------------------------------------------------------
+
+FROM rust:latest as tarpaulin_builder
+
+RUN cargo install cargo-tarpaulin --root /build
+
+# ------------------------------------------------------------------------------
 # Final stage
 # ------------------------------------------------------------------------------
 
-FROM ubuntu:20.04
-
-# Install Rust
-RUN apt-get update \
-  && DEBIAN_FRONTEND="noninteractive" apt-get install -y \
-    cargo \
-    rustc \
-  && rm -rf /var/lib/apt/lists/*
-
-# Install Tarpaulin dependencies
-RUN apt-get update \
-  && DEBIAN_FRONTEND="noninteractive" apt-get install -y \
-    libssl-dev \
-  && rm -rf /var/lib/apt/lists/*
-
-# Install tarpaulin
-RUN cargo install cargo-tarpaulin
+FROM rust:latest
 
 # Copy PROJ artifacts from proj_builder
 COPY --from=proj_builder /build/usr/share/proj/ /usr/share/proj/
 COPY --from=proj_builder /build/usr/include/ /usr/include/
 COPY --from=proj_builder /build/usr/bin/ /usr/bin/
 COPY --from=proj_builder /build/usr/lib/ /usr/lib/
+
+# Copy tarpauling artifacts from proj_builder
+COPY --from=tarpaulin_builder /build/bin/ /usr/local/cargo/bin/
