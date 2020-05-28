@@ -1,15 +1,15 @@
 # https://hub.docker.com/orgs/georust/geo-ci
 
-FROM ubuntu:20.04
+# ------------------------------------------------------------------------------
+# PROJ build stage
+# ------------------------------------------------------------------------------
 
-# Install Rust
-RUN apt-get update \
-  && DEBIAN_FRONTEND="noninteractive" apt-get install -y \
-    cargo \
-    rustc \
-  && rm -rf /var/lib/apt/lists/*
+FROM ubuntu:20.04 as proj_builder
 
-# Install PROJ dependencies
+# Specify where PROJ will get installed
+ARG DESTDIR="/build"
+
+# Install dependencies
 RUN apt-get update \
   && DEBIAN_FRONTEND="noninteractive" apt-get install -y \
     clang \
@@ -19,7 +19,27 @@ RUN apt-get update \
     make \
     pkg-config \
     sqlite3 \
-    wget \
+    wget
+
+# Compile and install
+RUN wget https://github.com/OSGeo/PROJ/releases/download/7.0.0/proj-7.0.0.tar.gz \
+  && tar -xzvf proj-7.0.0.tar.gz \
+  && cd proj-7.0.0 \
+  && ./configure --disable-dependency-tracking --prefix=/usr \
+  && make \
+  && make install
+
+# ------------------------------------------------------------------------------
+# Final stage
+# ------------------------------------------------------------------------------
+
+FROM ubuntu:20.04
+
+# Install Rust
+RUN apt-get update \
+  && DEBIAN_FRONTEND="noninteractive" apt-get install -y \
+    cargo \
+    rustc \
   && rm -rf /var/lib/apt/lists/*
 
 # Install Tarpaulin dependencies
@@ -31,26 +51,7 @@ RUN apt-get update \
 # Install tarpaulin
 RUN cargo install cargo-tarpaulin
 
-# Install PROJ dependencies
-RUN apt-get update \
-  && DEBIAN_FRONTEND="noninteractive" apt-get install -y \
-    clang \
-    libcurl4-gnutls-dev \
-    libsqlite3-dev \
-    libtiff5-dev \
-    make \
-    pkg-config \
-    sqlite3 \
-    wget \
-  && rm -rf /var/lib/apt/lists/*
-
-# Compile and install PROJ
-RUN wget https://github.com/OSGeo/PROJ/releases/download/7.0.0/proj-7.0.0.tar.gz \
-  && tar -xzvf proj-7.0.0.tar.gz \
-  && cd proj-7.0.0 \
-  && ./configure --disable-dependency-tracking --prefix=/usr \
-  && make \
-  && make install \
-  && cd .. \
-  && rm -rf proj-7.0.0.tar.gz \
-  && rm -rf proj-7.0.0
+COPY --from=proj_builder /build/usr/share/proj/ /usr/share/proj/
+COPY --from=proj_builder /build/usr/include/ /usr/include/
+COPY --from=proj_builder /build/usr/bin/ /usr/bin/
+COPY --from=proj_builder /build/usr/lib/ /usr/lib/
