@@ -44,11 +44,13 @@ RUN cargo install cargo-tarpaulin --root /build
 FROM ubuntu:20.04
 
 # clang and libtiff5 are needed to build geo with `--features use-proj`
+# curl is needed to run tarpaulin
 RUN apt-get update \
   && DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
     ca-certificates \
     cargo \
     clang \
+    curl \
     git \
     libtiff5 \
     rustc \
@@ -61,4 +63,4 @@ COPY --from=proj_builder /build/usr/bin/ /usr/bin/
 COPY --from=proj_builder /build/usr/lib/ /usr/lib/
 
 # Copy tarpauling artifacts from proj_builder
-COPY --from=tarpaulin_builder /build/bin/ /usr/local/cargo/bin/
+COPY --from=tarpaulin_builder /build/bin/ /root/.cargo/bin
