@@ -25,8 +25,8 @@ RUN apt-get update \
 RUN wget https://github.com/OSGeo/PROJ/releases/download/7.0.1/proj-7.0.1.tar.gz \
   && tar -xzvf proj-7.0.1.tar.gz \
   && cd proj-7.0.1 \
-  && ./configure --disable-dependency-tracking --prefix=/usr \
-  && make \
+  && ./configure --prefix=/usr \
+  && make -j$(nproc) \
   && make install
 
 # ------------------------------------------------------------------------------
@@ -46,7 +46,9 @@ FROM rust:latest
 # Clang is needed to build geo with `--features use-proj`
 RUN apt-get update \
   && apt-get install -y \
-    clang
+    cargo \
+    clang \
+    rustc
 
 # Copy PROJ artifacts from proj_builder
 COPY --from=proj_builder /build/usr/share/proj/ /usr/share/proj/
