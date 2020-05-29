@@ -43,6 +43,11 @@ RUN cargo install cargo-tarpaulin --root /build
 
 FROM rust:latest
 
+# Clang is needed to build geo with `--features use-proj`
+RUN apt-get update \
+  && apt-get install -y \
+    clang
+
 # Copy PROJ artifacts from proj_builder
 COPY --from=proj_builder /build/usr/share/proj/ /usr/share/proj/
 COPY --from=proj_builder /build/usr/include/ /usr/include/
