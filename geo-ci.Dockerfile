@@ -46,6 +46,7 @@ FROM ubuntu:20.04
 # clang and libtiff5 are needed to build geo with `--features use-proj`
 RUN apt-get update \
   && DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
+    ca-certificates \
     cargo \
     clang \
     git \
