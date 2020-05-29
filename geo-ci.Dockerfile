@@ -41,14 +41,17 @@ RUN cargo install cargo-tarpaulin --root /build
 # Final stage
 # ------------------------------------------------------------------------------
 
-FROM rust:latest
+FROM ubuntu:20.04
 
-# Clang is needed to build geo with `--features use-proj`
+# clang and libtiff5 are needed to build geo with `--features use-proj`
 RUN apt-get update \
-  && apt-get install -y \
+  && DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
     cargo \
     clang \
-    rustc
+    git \
+    libtiff5 \
+    rustc \
+  && rm -rf /var/lib/apt/lists/*
 
 # Copy PROJ artifacts from proj_builder
 COPY --from=proj_builder /build/usr/share/proj/ /usr/share/proj/
