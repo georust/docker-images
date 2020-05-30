@@ -63,4 +63,4 @@ COPY --from=proj_builder /build/usr/bin/ /usr/bin/
 COPY --from=proj_builder /build/usr/lib/ /usr/lib/
 
 # Copy tarpauling artifacts from proj_builder
-COPY --from=tarpaulin_builder /build/bin/ /root/.cargo/bin
+COPY --from=tarpaulin_builder /build/bin/ /usr/bin
