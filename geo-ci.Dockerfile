@@ -22,9 +22,9 @@ RUN apt-get update \
     wget
 
 # Compile and install
-RUN wget https://github.com/OSGeo/PROJ/releases/download/7.0.1/proj-7.0.1.tar.gz \
-  && tar -xzvf proj-7.0.1.tar.gz \
-  && cd proj-7.0.1 \
+RUN wget https://github.com/OSGeo/PROJ/releases/download/7.1.0/proj-7.1.0.tar.gz \
+  && tar -xzvf proj-7.1.0.tar.gz \
+  && cd proj-7.1.0 \
   && ./configure --prefix=/usr \
   && make -j$(nproc) \
   && make install
