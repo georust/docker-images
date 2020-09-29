@@ -17,6 +17,7 @@ RUN apt-get update \
     libsqlite3-dev \
     libtiff5-dev \
     make \
+    build-essential \
     cmake \
     pkg-config \
     sqlite3 \
