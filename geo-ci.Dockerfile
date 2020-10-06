@@ -29,6 +29,6 @@ RUN apt-get update \
     rustc \
   && rm -rf /var/lib/apt/lists/*
 
-COPY --from=libproj-builder:latest /build/usr /usr
+COPY --from=georust/libproj-builder /build/usr /usr
 COPY --from=tarpaulin-builder /build/bin /usr/bin
 
