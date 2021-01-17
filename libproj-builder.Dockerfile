@@ -2,7 +2,7 @@
 
 # Builds libproj from source
 
-FROM ubuntu:20.04
+FROM rust:1.49 as tarpaulin-builder
 
 # Install dependencies
 RUN apt-get update \
