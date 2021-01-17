@@ -19,7 +19,6 @@ FROM rust:1.49
 RUN apt-get update \
   && DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
     ca-certificates \
-    cargo \
     clang \
     curl \
     git \
