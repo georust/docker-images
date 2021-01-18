@@ -26,6 +26,6 @@ RUN apt-get update \
     pkg-config \
   && rm -rf /var/lib/apt/lists/*
 
-COPY --from=georust/libproj-builder /build/usr /usr
+COPY --from=georust/libproj-builder:rust-1.49 /build/usr /usr
 COPY --from=tarpaulin-builder /build/bin /usr/bin
 
