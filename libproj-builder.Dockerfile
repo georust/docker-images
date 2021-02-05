@@ -32,9 +32,9 @@ RUN apt-get update \
 #    ...
 #    COPY --from=libproj-builder /build/usr /usr
 #    ...
-RUN wget https://github.com/OSGeo/PROJ/releases/download/7.1.0/proj-7.1.0.tar.gz
-RUN tar -xzvf proj-7.1.0.tar.gz
-RUN mv proj-7.1.0 proj-src
+RUN wget https://github.com/OSGeo/PROJ/releases/download/7.2.0/proj-7.2.0.tar.gz
+RUN tar -xzvf proj-7.2.0.tar.gz
+RUN mv proj-7.2.0 proj-src
 WORKDIR /proj-src
 RUN ./configure --prefix=/usr
 RUN make -j$(nproc)
