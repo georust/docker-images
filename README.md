@@ -1,8 +1,10 @@
 # Georust Docker Images
 
-## Instructions for updating proj Docker images and the proj crate
+## Instructions for updating `proj` Docker images, the `proj` crate, and the `proj` version in use by the `geo` crate
 
 In this example, we'll be updating to `PROJ 7.2.1`, using the tag name `proj-7.2.1`
+
+Remember: the 
 
 1. Edit `libproj-builder.Dockerfile` to download and build the latest stable version of `PROJ`
 2. Build the image, tagging it with the new `PROJ` version: `docker build -t georust/libproj-builder:proj-7.2.1 -f libproj-builder.Dockerfile .`
@@ -16,4 +18,6 @@ In this example, we'll be updating to `PROJ 7.2.1`, using the tag name `proj-7.2
 10. You can now update the compressed `PROJ` version in [the proj repo](https://github.com/georust/proj/proj-sys/PROJSRC)
 11. Edit the adjacent [https://github.com/georust/proj/proj-sys/build.rs](`build.rs`) to look for the updated version
 12. Finally, edit https://github.com/georust/proj/.github/workflows/test.yml to use the Docker images with the new tag, and open a PR to test your changes
-13. When the PR has merged and the `proj` crate has been published, you can update [geo](https://github.com/georust/geo) to use the new `proj` crate, and modify its test script to use the new Docker images.
+13. When the PR has merged and the `proj` crate has been published, you can update [geo](https://github.com/georust/geo) to use the new `proj` crate:
+14. Modify `geo-ci.Dockerfile` to use the latest `libproj-builder` tag, then build _it_ with a new tag, and push that new tag to Docker hub
+15. You can now modify the `geo` test script to use the new `geo-ci` Docker tag, allowing the updated `proj` crate version to be tested using the correct Docker images.
