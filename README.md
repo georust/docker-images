@@ -14,9 +14,10 @@ In this example, we'll be updating to `PROJ 7.2.1`, using the tag name `proj-7.2
 7. `docker build -t georust/proj-ci-without-system-proj:proj-7.2.1 -f proj-ci-without-system-proj.Dockerfile .`
 8. `docker push georust/proj-ci-without-system-proj:proj-7.2.1`
 9. The three images should now each have a new tag, `proj-7.2.1` on Docker Hub
-10. You can now update the compressed `PROJ` version in [the proj repo](https://github.com/georust/proj/proj-sys/PROJSRC)
-11. Edit the adjacent [https://github.com/georust/proj/proj-sys/build.rs](`build.rs`) to look for the updated version
-12. Finally, edit https://github.com/georust/proj/.github/workflows/test.yml to use the Docker images with the new tag, and open a PR to test your changes
-13. When the PR has merged and the `proj` crate has been published, you can update [geo](https://github.com/georust/geo) to use the new `proj` crate:
-14. Modify `geo-ci.Dockerfile` to use the latest `libproj-builder` tag, then build _it_ with a new tag, and push it to Docker hub
-15. You can now modify the `geo` test script to use the new `geo-ci` Docker tag, allowing the updated `proj` crate version in use by `geo` to be tested using the correct Docker images.
+10. You will now need to open a separate PR to update the `proj-sys` and `proj` tests. Note that this PR must be **manually merged** as bors cannot modify workfows. Edit https://github.com/georust/proj/.github/workflows/test.yml to use the Docker images with the new tag
+11. When the PR in step 10 has merged, you can update the compressed `PROJ` version in [the proj repo](https://github.com/georust/proj/proj-sys/PROJSRC)
+12. Edit the adjacent [https://github.com/georust/proj/proj-sys/build.rs](`build.rs`) to look for the updated PROJ version
+13. Bump the `proj-sys` version and update `proj/Cargo.toml` to use it. You can now open a PR to update the `proj`crate
+14. When the PR has merged and the `proj` crate has been published, you can update [geo](https://github.com/georust/geo) to use the new `proj` crate:
+15. Modify `geo-ci.Dockerfile` to use the latest `libproj-builder` tag, then build `geo-ci` with a new tag and push it to Docker hub
+16. You can now modify the `geo` test script to use the new `geo-ci` Docker tag, allowing the updated `proj` crate version in use by `geo` to be tested using the correct Docker images.
