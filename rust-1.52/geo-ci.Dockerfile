@@ -4,14 +4,14 @@
 # tarpaulin build stage
 # ------------------------------------------------------------------------------
 
-FROM rust:1.49 as tarpaulin-builder
+FROM rust:1.52 as tarpaulin-builder
 RUN cargo install cargo-tarpaulin --root /build
 
 # ------------------------------------------------------------------------------
 # Final stage
 # ------------------------------------------------------------------------------
 
-FROM rust:1.49
+FROM rust:1.52
 
 # clang and libtiff5 are needed to build geo with `--features use-proj`
 # note: I think we can remove clang if we make bindgen optional, see https://github.com/georust/proj-sys/issues/24
@@ -26,6 +26,6 @@ RUN apt-get update \
     pkg-config \
   && rm -rf /var/lib/apt/lists/*
 
-COPY --from=georust/libproj-builder:rust-1.49 /build/usr /usr
+COPY --from=georust/libproj-builder:rust-1.52 /build/usr /usr
 COPY --from=tarpaulin-builder /build/bin /usr/bin
 

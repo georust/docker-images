@@ -34,44 +34,30 @@ running CI against each patch seems like overkill at this point.
 
 ### add a new set of Dockerfiles
 
-i.e. assume we're adding support for rust 1.50.
+i.e. assume we're adding support for rust 1.53.
 
-    cp -r rust-1.49 rust-1.50
-    # edit all Dockerfiles and tags to refer to rust-1.50 instead of rust-1.49
-    vim rust-1.50/*
+    cp -r rust-1.52 rust-1.53
+
+    # edit all Makefile and Dockerfile tags to refer to rust-1.53 instead of rust-1.52
+    vim rust-1.53/*
+
+    cd rust-1.53/
+
+    # build containers and push to docker hub
+    # This pushes both the (e.g.) geo-ci:rust-1.53 and geo-ci:latest tag
+    make build-all publish-all publish-latest
 
     # optionally drop support for old unsupported versions
     rm -fr rust-1.49
-
-Push this to a branch, i.e. "mkirk/rust-1.50" and open a Draft PR, e.g.
-https://github.com/georust/docker-images/pulls/11
-
-### add builds to Dockerhub
-
-1. Add a new automated build to dockerhub for each container for the new rust
-   version.  Note: The libproj-builder's container build must be done before
-   the others, since our other containers depend on libproj-builder.
-  1. https://hub.docker.com/repository/docker/georust/libproj-builder/builds/edit
-  2. Add new "Build Rule" with:
-    1. Source Type: branch
-    2. Source: mkirk/rust-1.50 (after our PR is merged, we'll have to replace this with `master`)
-    3. Docker Tag: rust-1.50
-    4. Dockerfile location: rust-1.50/libproj-builder.Dockerfile
-  3. Save and start that build. Once it's complete, you can repeat the process
-     for the other containers (geo-ci, proj-ci, proj-ci-without-system-proj)
-
+ 
 ### Verify the new containers work
 
-Open a PR in the affected repositories referencing the new containers, e.g. https://github.com/georust/docker-images/pull/11.
-
-Make sure that CI successfully runs against the new containers.
+Open a PR in the affected repositories referencing the new container tags, and
+make sure that CI successfully runs against the new containers.
 
 ### Merge ahoy!
 
 If your new CI containers passed their tests, everything can be merged. 
-
-The Dockerhub builds added should be updated to build from master, rather than
-your PR branch. This is annoying, but I'm not sure of a better way.
 
 ## How to Update Proj
 
