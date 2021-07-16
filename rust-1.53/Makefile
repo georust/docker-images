@@ -30,6 +30,9 @@ libproj-builder:
 publish-all: publish-libproj-builder publish-proj-ci-without-system-proj publish-proj-ci publish-geo-ci
 # publish-all: publish-libproj-builder publish-proj-ci-without-system-proj publish-proj-ci
 
+publish-all-latest: DOCKER_TAG=latest
+publish-all-latest: publish-all
+
 publish-geo-ci:
 	docker push georust/geo-ci:$(DOCKER_TAG)
 
