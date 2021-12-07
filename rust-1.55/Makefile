@@ -1,5 +1,5 @@
 GEORUST_ROOT=$(CURDIR)/../..
-DOCKER_TAG=rust-1.53
+DOCKER_TAG=rust-1.55
 # On x86 Linux or Mac, you should be able to do a plain `docker build`
 DOCKER_BUILD_CMD=docker build
 
