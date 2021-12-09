@@ -36,7 +36,9 @@ running CI against each patch seems like overkill at this point.
 
 i.e. assume we're adding support for rust 1.53.
 
-    ./generate 1.53
+    ./add-version.sh 1.53
+
+    cd rust-1.53
 
     # build containers
     make build-all
@@ -62,19 +64,14 @@ In this example, we'll be updating to `PROJ 7.2.1`
 
 Edit `template/libproj-builder.Dockerfile` to download and build `PROJ` 7.2.1
 
-Regenerate the dockerfiles for all supported versions of rust:
+Then
 
+    # regenerate the dockerfiles for all supported versions of rust
     ./regenerate-all.sh
 
-Then, for each supported version of rust (in this example, rust-1.49):
-
-    cd rust-1.49
-    # rebuild the containers
-    make build-all
-    # retest the containers
-    make test-all
-    # republish the containers
-    make publish-all
+    # update the containers for each supported version of rust
+    # Note: this will take some significant time and ram...
+    ./for-each-rust.sh make build-all run-all publish-all
 
 ### Update the `proj` crate
 

@@ -5,6 +5,6 @@ for RUST_DIR in rust-*
 do
     RUST_VERSION=$(echo $RUST_DIR | sed 's/rust-//')
     rm -r $RUST_DIR
-    ./generate.sh $RUST_VERSION
+    ./add-version.sh $RUST_VERSION
 done
 
