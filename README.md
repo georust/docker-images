@@ -62,12 +62,12 @@ In this example, we'll be updating to `PROJ 7.2.1`
 
 Edit `template/libproj-builder.Dockerfile` to download and build `PROJ` 7.2.1
 
+Regenerate the dockerfiles for all supported versions of rust:
+
+    ./regenerate-all.sh
+
 Then, for each supported version of rust (in this example, rust-1.49):
 
-    # remove old docker files
-    rm -fr rust-1.49
-    # regenerate the docker files
-    ./generate 1.49
     cd rust-1.49
     # rebuild the containers
     make build-all

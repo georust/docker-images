@@ -20,7 +20,20 @@ then
 	exit 1
 fi
 
-	
+# Using sed to modify a file in place has annoying different per platform
+# syntax
+function sed_in_place() {
+    case "$(uname -s)" in
+        Darwin)
+            sed -i '' $@
+            ;;
+
+        *)
+            sed -i $@
+            ;;
+    esac
+}
+
 TARGET=rust-$RUST_VERSION
 
 if [ -d "$TARGET" ]; then
@@ -31,9 +44,10 @@ fi
 echo "Generating $TARGET"
 
 cp -r template $TARGET
+
 for file in $TARGET/*
 do
-    sed -i'' "s/%RUST_VERSION%/$RUST_VERSION/" $file 
+    sed_in_place "s/%RUST_VERSION%/$RUST_VERSION/" $file
 done
 
 cat << EOS > $TARGET/DO_NOT_EDIT
