@@ -16,8 +16,15 @@ END
 
 if [ -z $RUST_VERSION ]
 then
-	echo "$USAGE"
-	exit 1
+    echo "$USAGE"
+    exit 1
+fi
+
+if [[ "$RUST_VERSION" == *rust* ]]; then
+    echo "$USAGE"
+    echo ""
+    echo \[\!\] Do not include \"rust\" in the version string. Just include the version
+    exit 1
 fi
 
 # Using sed to modify a file in place has annoying different per platform
@@ -37,8 +44,8 @@ function sed_in_place() {
 TARGET=rust-$RUST_VERSION
 
 if [ -d "$TARGET" ]; then
-	echo "$TARGET already exists. Delete it first."
-	exit 1
+    echo "$TARGET already exists. Delete it first."
+    exit 1
 fi
 
 echo "Generating $TARGET"
