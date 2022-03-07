@@ -53,19 +53,19 @@ proj-ci-without-system-proj-shell:
 proj-ci-shell:
 	$(DOCKER_RUN_CMD) -ti -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) bash -l
 
-run-all: run-proj-ci run-proj-sys-ci run-geo-ci
+test-all: test-proj-ci test-proj-sys-ci test-geo-ci
 
-run-geo-ci:
+test-geo-ci:
 	echo 1 \
 		&& $(DOCKER_RUN_CMD) -w /tmp/georust/geo georust/geo-ci:$(DOCKER_TAG) /bin/bash -c "cargo test --no-default-features && cargo test && cargo test --all-features"
 
-run-proj-ci:
+test-proj-ci:
 	echo 1 \
 		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) cargo test --no-default-features \
 		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) cargo test --features bundled_proj \
 		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) cargo test --features network
 
-run-proj-sys-ci:
+test-proj-sys-ci:
 	echo 1 \
 		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj/proj-sys --env "_PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1" georust/proj-ci-without-system-proj:$(DOCKER_TAG) cargo test \
 	    && $(DOCKER_RUN_CMD) -w /tmp/georust/proj/proj-sys --env "_PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=0" georust/proj-ci:$(DOCKER_TAG) cargo test \
