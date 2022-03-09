@@ -1,7 +1,7 @@
 GEORUST_ROOT=$(CURDIR)/../..
 DOCKER_TAG=rust-1.56
-# On x86 Linux or Mac, you should be able to do a plain `docker build`
 DOCKER_BUILD_CMD=docker build
+DOCKER_RUN_CMD=docker run -v $(GEORUST_ROOT):/tmp/georust -e CARGO_TARGET_DIR=/tmp/cargo-target
 
 # WIP: On macos w/ apple silicon (aarch64), you'll need buildx to output the proper
 # platform/arch for CI.
@@ -42,31 +42,31 @@ publish-libproj-builder:
 	docker push georust/libproj-builder:$(DOCKER_TAG)
 
 geo-ci-shell:
-	docker run -ti -v $(GEORUST_ROOT):/tmp/georust georust/geo-ci:$(DOCKER_TAG) bash -l
+	$(DOCKER_RUN_CMD) -ti georust/geo-ci:$(DOCKER_TAG) bash -l
 
 libproj-builder-shell:
-	docker run -ti -v $(GEORUST_ROOT):/tmp/georust georust/libproj-builder:$(DOCKER_TAG) bash -l
+	$(DOCKER_RUN_CMD) -ti georust/libproj-builder:$(DOCKER_TAG) bash -l
 
 proj-ci-without-system-proj-shell:
-	docker run -ti -v $(GEORUST_ROOT):/tmp/georust georust/proj-ci-without-system-proj:$(DOCKER_TAG) bash -l
+	$(DOCKER_RUN_CMD) -ti georust/proj-ci-without-system-proj:$(DOCKER_TAG) bash -l
 
 proj-ci-shell:
-	docker run -ti -v $(GEORUST_ROOT):/tmp/georust -w /tmp/georust/proj georust/proj-ci$(DOCKER_TAG) bash -l
+	$(DOCKER_RUN_CMD) -ti -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) bash -l
 
-run-all: run-proj-ci run-proj-sys-ci run-geo-ci
+test-all: test-proj-ci test-proj-sys-ci test-geo-ci
 
-run-geo-ci:
+test-geo-ci:
 	echo 1 \
-		&& docker run -v $(GEORUST_ROOT):/tmp/georust -w /tmp/georust/geo georust/geo-ci:$(DOCKER_TAG) /bin/bash -c "cargo test --no-default-features && cargo test && cargo test --all-features"
+		&& $(DOCKER_RUN_CMD) -w /tmp/georust/geo georust/geo-ci:$(DOCKER_TAG) /bin/bash -c "cargo test --no-default-features && cargo test && cargo test --all-features"
 
-run-proj-ci:
+test-proj-ci:
 	echo 1 \
-		&& docker run -v $(GEORUST_ROOT):/tmp/georust -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) cargo test --no-default-features \
-		&& docker run -v $(GEORUST_ROOT):/tmp/georust -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) cargo test --features bundled_proj \
-		&& docker run -v $(GEORUST_ROOT):/tmp/georust -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) cargo test --features network
+		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) cargo test --no-default-features \
+		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) cargo test --features bundled_proj \
+		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) cargo test --features network
 
-run-proj-sys-ci:
+test-proj-sys-ci:
 	echo 1 \
-		&& docker run -v $(GEORUST_ROOT):/tmp/georust -w /tmp/georust/proj/proj-sys --env "_PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1" georust/proj-ci-without-system-proj:$(DOCKER_TAG) cargo test \
-	    && docker run -v $(GEORUST_ROOT):/tmp/georust -w /tmp/georust/proj/proj-sys --env "_PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=0" georust/proj-ci:$(DOCKER_TAG) cargo test \
-	    && docker run -v $(GEORUST_ROOT):/tmp/georust -w /tmp/georust/proj/proj-sys --env "_PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1" georust/proj-ci:$(DOCKER_TAG) cargo test --features bundled_proj
+		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj/proj-sys --env "_PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1" georust/proj-ci-without-system-proj:$(DOCKER_TAG) cargo test \
+	    && $(DOCKER_RUN_CMD) -w /tmp/georust/proj/proj-sys --env "_PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=0" georust/proj-ci:$(DOCKER_TAG) cargo test \
+	    && $(DOCKER_RUN_CMD) -w /tmp/georust/proj/proj-sys --env "_PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1" georust/proj-ci:$(DOCKER_TAG) cargo test --features bundled_proj
