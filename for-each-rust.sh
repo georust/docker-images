@@ -15,8 +15,9 @@ echo pids $pids
 for key pid in "${(@kv)pids}"
 do
     wait $pid
-    echo "finished $key (pid: $pid)"
-    statuses[$key]=$?
+    local pid_status=$?
+    echo "finished $key (pid: $pid) with status: $pid_status"
+    statuses[$key]=$pid_status
 done
 
 for key val in "${(@kv)statuses}"
