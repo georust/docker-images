@@ -32,6 +32,15 @@ running CI against each patch seems like overkill at this point.
 
 ## How to Update Rust
 
+### Prerequisites
+
+It's assumed that you have a directory structure containing dependent georust repositories like this:
+
+  $ ls
+  docker-containers  # (this repository)
+  geo
+  proj
+
 ### add a new set of Dockerfiles
 
 i.e. assume we're adding support for rust 1.53.
@@ -51,7 +60,16 @@ i.e. assume we're adding support for rust 1.53.
 
     # optionally drop support for old unsupported versions
     rm -fr rust-1.49
- 
+
+### To update multiple Rust versions in parallel
+
+If you have multiple versions of rust you want to build/test/publish:
+
+    ./for-each-rust.sh rust-1.49 rust-1.50 -- make build-all
+
+For more:
+    ./for-each-rust.sh --help
+
 ## How to Update Proj
 
 libproj (the cpp lib) is built using the [docker container builder
