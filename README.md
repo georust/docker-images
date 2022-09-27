@@ -89,7 +89,7 @@ Then
 
     # update the containers for each supported version of rust
     # Note: this will take some significant time and ram...
-    ./for-each-rust.sh make build-all run-all publish-all
+    ./for-each-rust.sh --all -- make build-all test-all publish-all
 
 ### Update the `proj` crate
 
