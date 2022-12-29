@@ -61,9 +61,7 @@ test-geo-ci:
 
 test-proj-ci:
 	echo 1 \
-		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) cargo test --no-default-features \
-		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) cargo test --features bundled_proj \
-		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) cargo test --features network
+		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) /bin/bash -c "cargo test --no-default-features && cargo test --features bundled_proj && cargo test --features network"
 
 test-proj-sys-ci:
 	echo 1 \

@@ -32,9 +32,9 @@ RUN apt-get update \
 #    ...
 #    COPY --from=libproj-builder /build/usr /usr
 #    ...
-RUN wget https://github.com/OSGeo/PROJ/releases/download/9.0.0/proj-9.0.0.tar.gz
-RUN tar -xzvf proj-9.0.0.tar.gz
-RUN mv proj-9.0.0 proj-src
+RUN wget https://github.com/OSGeo/PROJ/releases/download/9.1.0/proj-9.1.0.tar.gz
+RUN tar -xzvf proj-9.1.0.tar.gz
+RUN mv proj-9.1.0 proj-src
 
 # from https://proj.org/install.html
 RUN mkdir /proj-src/build

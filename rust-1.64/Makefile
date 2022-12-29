@@ -1,5 +1,5 @@
 GEORUST_ROOT=$(CURDIR)/../..
-DOCKER_TAG=$(DOCKER_TAG_PREFIX)rust-1.57
+DOCKER_TAG=$(DOCKER_TAG_PREFIX)rust-1.64
 DOCKER_BUILD_CMD=docker build
 DOCKER_RUN_CMD=docker run -v $(GEORUST_ROOT):/tmp/georust -e CARGO_TARGET_DIR=/tmp/cargo-target
 
@@ -61,9 +61,7 @@ test-geo-ci:
 
 test-proj-ci:
 	echo 1 \
-		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) cargo test --no-default-features \
-		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) cargo test --features bundled_proj \
-		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) cargo test --features network
+		&& $(DOCKER_RUN_CMD) -w /tmp/georust/proj georust/proj-ci:$(DOCKER_TAG) /bin/bash -c "cargo test --no-default-features && cargo test --features bundled_proj && cargo test --features network"
 
 test-proj-sys-ci:
 	echo 1 \
