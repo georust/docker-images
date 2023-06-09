@@ -2,7 +2,7 @@
 
 # Builds libproj from source
 
-FROM rust:1.62
+FROM rust:1.68
 
 # Install dependencies
 RUN apt-get update \

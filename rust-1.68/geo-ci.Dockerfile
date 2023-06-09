@@ -4,7 +4,7 @@
 # Final stage
 # ------------------------------------------------------------------------------
 
-FROM rust:1.61
+FROM rust:1.68
 
 # clang and libtiff5 are needed to build geo with `--features use-proj`
 # note: I think we can remove clang if we make bindgen optional, see https://github.com/georust/proj-sys/issues/24
@@ -17,5 +17,5 @@ RUN apt-get update \
     pkg-config \
   && rm -rf /var/lib/apt/lists/*
 
-COPY --from=georust/libproj-builder:rust-1.61 /build/usr /usr
+COPY --from=georust/libproj-builder:rust-1.68 /build/usr /usr
 
