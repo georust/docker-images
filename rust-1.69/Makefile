@@ -1,5 +1,5 @@
 GEORUST_ROOT=$(CURDIR)/../..
-DOCKER_TAG=$(DOCKER_TAG_PREFIX)rust-1.61
+DOCKER_TAG=$(DOCKER_TAG_PREFIX)rust-1.69
 DOCKER_BUILD_CMD=docker build
 DOCKER_RUN_CMD=docker run -v $(GEORUST_ROOT):/tmp/georust -e CARGO_TARGET_DIR=/tmp/cargo-target
 
