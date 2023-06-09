@@ -100,3 +100,20 @@ Then
 ### Update the `geo` crate
 
 - When the PR has merged and the `proj` crate has been published, you can update [geo](https://github.com/georust/geo) to use the new `proj` crate:
+
+### Publishing
+
+To publish all the containers for a version of rust:
+
+    # e.g. to publish geo-ci:rust-1.58, proj-ci:rust-1.58, etc.
+    cd rust-1.58
+    make publish-all
+
+You can quickly publish multiple versions like this:
+
+    ./for-each-rust.sh rust-1.58 rust-1.59 -- make publish-all
+
+If you'd like to publish with a speical tag, e.g. if you are updating proj and don't want to clobber the existing tags, specify a `DOCKER_TAG_PREFIX`. Note you must build with this tag as well.
+
+    # tag and publish geo-ci:proj-9.1.0-rust-1.58, proj-ci:proj-9-1.0-rust-1.58, etc.
+    DOCKER_TAG_PREFIX=proj-9.1.0- make build-all publish-all
