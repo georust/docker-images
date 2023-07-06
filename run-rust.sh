@@ -2,6 +2,7 @@
 
 declare -A pids
 declare -A statuses
+declare -a rust_versions
 
 USAGE=$(cat <<-END
 # $(basename $0)
@@ -11,11 +12,11 @@ Usage to run for all versions:
     $(basename $0) --all -- <cmd>
 
 Usage for specific versions:
-    $(basename $0) <rust-dir-1 rust-dir-2> -- <cmd>
+    $(basename $0) <rust-version-1 rust-version-2> -- <cmd>
 
 
 Example:
-    $(basename $0) rust-1.56 rust-1.57 -- make
+    $(basename $0) 1.56 1.57 -- make
 
 END
 )
@@ -41,25 +42,19 @@ case $1 in
     exit 0
   ;;
 --all)
-    rust_dirs=(rust-*)
+    rust_versions=("${(f)"$(<rust-versions.txt)"}")
     shift
     expect_cmd $@
   ;;
 *)
-    rust_dirs=()
+    rust_versions=()
     while [[ $1 != "" ]]; do
         next_arg=$1
         if [[ $next_arg == "--" ]]; then
             break
         fi
-
-        if [ -d "$next_arg" ]; then
-            rust_dirs+=("$next_arg")
-            shift
-        else
-            usage_violation "directory doesn't exist: $next_arg"
-            exit 1
-        fi
+        rust_versions+=("$next_arg")
+        shift
     done
     expect_cmd $@
   ;;
@@ -69,12 +64,13 @@ if [[ -z $CMD ]]; then
     usage_violation "no cmd set"
 fi
 
+proj_version=$(sed '/^$/d' ./proj-version.txt)
 # for every version of rust we support...
-for rust_dir in $rust_dirs
+for rust_version in $rust_versions
 do
-    # run the given command in that rust-dir in parallel
-    (cd $rust_dir && $CMD)&
-    pids[$rust_dir]="$!"
+    # run the given command for each rust-version in parallel
+    (PROJ_VERSION="$proj_version" RUST_VERSION="$rust_version" $CMD)&
+    pids[$rust_version]="$!"
 done
 
 echo pids $pids

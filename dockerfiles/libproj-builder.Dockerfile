@@ -2,7 +2,13 @@
 
 # Builds libproj from source
 
-FROM rust:%RUST_VERSION%
+ARG RUST_VERSION
+FROM rust:$RUST_VERSION
+
+ARG RUST_VERSION
+ARG PROJ_VERSION
+RUN test -n "$RUST_VERSION" || (echo "RUST_VERSION ARG not set" && false)
+RUN test -n "$PROJ_VERSION" || (echo "PROJ_VERSION ARG not set" && false)
 
 # Install dependencies
 RUN apt-get update \
@@ -32,9 +38,9 @@ RUN apt-get update \
 #    ...
 #    COPY --from=libproj-builder /build/usr /usr
 #    ...
-RUN wget https://github.com/OSGeo/PROJ/releases/download/9.2.1/proj-9.2.1.tar.gz
-RUN tar -xzvf proj-9.2.1.tar.gz
-RUN mv proj-9.2.1 proj-src
+RUN wget https://github.com/OSGeo/PROJ/releases/download/${PROJ_VERSION}/proj-${PROJ_VERSION}.tar.gz
+RUN tar -xzvf proj-${PROJ_VERSION}.tar.gz
+RUN mv proj-${PROJ_VERSION} proj-src
 
 # from https://proj.org/install.html
 RUN mkdir /proj-src/build

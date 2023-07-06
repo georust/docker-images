@@ -1,28 +1,33 @@
-GEORUST_ROOT=$(CURDIR)/../..
-DOCKER_TAG=$(DOCKER_TAG_PREFIX)rust-%RUST_VERSION%
-DOCKER_BUILD_CMD=docker build
+GEORUST_ROOT=$(CURDIR)/..
+
+RUST_VERSION ?= $(error RUST_VERSION not set)
+PROJ_VERSION ?= $(error PROJ_VERSION not set)
+DOCKER_TAG=proj-$(PROJ_VERSION)-rust-$(RUST_VERSION)
+
+DOCKER_BUILD_CMD=docker build --build-arg RUST_VERSION=$(RUST_VERSION) --build-arg PROJ_VERSION=$(PROJ_VERSION)
 DOCKER_RUN_CMD=docker run -v $(GEORUST_ROOT):/tmp/georust -e CARGO_TARGET_DIR=/tmp/cargo-target
+DOCKERFILE_DIR=dockerfiles/
 
 # WIP: On macos w/ apple silicon (aarch64), you'll need buildx to output the proper
 # platform/arch for CI.
 # Currently though, this seems to output a libproj.a that's not usable.
-# DOCKER_BUILD_CMD=docker buildx build --platform linux/amd64 --push
+# DOCKER_BUILD_CMD=docker buildx build --platform linux/amd64
 
 default: build-all
 
 build-all: libproj-builder proj-ci-without-system-proj proj-ci geo-ci
 
 geo-ci:
-	$(DOCKER_BUILD_CMD) -f geo-ci.Dockerfile -t georust/geo-ci:$(DOCKER_TAG) .
+	$(DOCKER_BUILD_CMD) -f $(DOCKERFILE_DIR)geo-ci.Dockerfile -t georust/geo-ci:$(DOCKER_TAG) .
 
 proj-ci:
-	$(DOCKER_BUILD_CMD) -f proj-ci.Dockerfile -t georust/proj-ci:$(DOCKER_TAG) .
+	$(DOCKER_BUILD_CMD) -f $(DOCKERFILE_DIR)proj-ci.Dockerfile -t georust/proj-ci:$(DOCKER_TAG) .
 
 proj-ci-without-system-proj:
-	$(DOCKER_BUILD_CMD) -f proj-ci-without-system-proj.Dockerfile -t georust/proj-ci-without-system-proj:$(DOCKER_TAG) .
+	$(DOCKER_BUILD_CMD) -f $(DOCKERFILE_DIR)proj-ci-without-system-proj.Dockerfile -t georust/proj-ci-without-system-proj:$(DOCKER_TAG) .
 
 libproj-builder:
-	$(DOCKER_BUILD_CMD) -f libproj-builder.Dockerfile -t georust/libproj-builder:$(DOCKER_TAG) .
+	$(DOCKER_BUILD_CMD) -f $(DOCKERFILE_DIR)libproj-builder.Dockerfile -t georust/libproj-builder:$(DOCKER_TAG) .
 
 publish-all: publish-libproj-builder publish-proj-ci-without-system-proj publish-proj-ci publish-geo-ci
 
