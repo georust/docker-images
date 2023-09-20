@@ -37,38 +37,34 @@ running CI against each patch seems like overkill at this point.
 It's assumed that you have a directory structure containing dependent georust repositories like this:
 
   $ ls
-  docker-containers  # (this repository)
-  geo
-  proj
+  docker-containers  # this repository
+  geo                # needed to run tests
+  proj               # needed to run tests
 
-### add a new set of Dockerfiles
+### add a new Rust version
 
-i.e. assume we're adding support for rust 1.53.
-
-    ./add-version.sh 1.53
-
-    cd rust-1.53
+    echo "1.69" >> rust-versions.txt
 
     # build containers
-    make build-all
+    ./run-rust.sh 1.69 -- make build-all
 
     # run some tests on the new containers
-    make test-all
+    ./run-rust.sh 1.69 -- make test-all
 
     # If everythig looks good, you can publish the new tags
-    make publish-all
+    ./run-rust.sh 1.69 -- make publish-all
 
-    # optionally drop support for old unsupported versions
-    rm -fr rust-1.49
+    # delete any old unsupported rust versions from the file
+    edit rust-versions.txt
 
 ### To update multiple Rust versions in parallel
 
 If you have multiple versions of rust you want to build/test/publish:
 
-    ./for-each-rust.sh rust-1.49 rust-1.50 -- make build-all
+    ./run-rust.sh 1.49 1.50 -- make build-all
 
 For more:
-    ./for-each-rust.sh --help
+    ./run-rust.sh --help
 
 ## How to Update Proj
 
@@ -76,20 +72,15 @@ libproj (the cpp lib) is built using the [docker container builder
 pattern](https://docs.docker.com/develop/develop-images/multistage-build/), and
 then reused by multiple CI containers.
 
-In this example, we'll be updating to `PROJ 7.2.1`
+    edit proj-version.txt
 
-### Update CI Docker containers
+    # All containers will need to be rebuilt when updating proj
+    ./run-rust.sh --all -- make build-all
 
-Edit `template/libproj-builder.Dockerfile` to download and build `PROJ` 7.2.1
-
-Then
-
-    # regenerate the dockerfiles for all supported versions of rust
-    ./regenerate-all.sh
-
-    # update the containers for each supported version of rust
-    # Note: this will take some significant time and ram...
-    ./for-each-rust.sh --all -- make build-all test-all publish-all
+    # I often see intermittent failures when running all the tests at once, but
+    # haven't found time to dig into why this is happening.
+    # I typically re-run failed tests by themselves to see if the failures recurs.
+    ./run-rust.sh --all -- make test-all
 
 ### Update the `proj` crate
 
@@ -101,19 +92,14 @@ Then
 
 - When the PR has merged and the `proj` crate has been published, you can update [geo](https://github.com/georust/geo) to use the new `proj` crate:
 
-### Publishing
+### Publishing docker containers
 
 To publish all the containers for a version of rust:
 
     # e.g. to publish geo-ci:rust-1.58, proj-ci:rust-1.58, etc.
-    cd rust-1.58
-    make publish-all
+    ./run-rust.sh 1.58 -- make publish-all
 
 You can quickly publish multiple versions like this:
 
-    ./for-each-rust.sh rust-1.58 rust-1.59 -- make publish-all
+    ./run-rust.sh 1.58 1.59 -- make publish-all
 
-If you'd like to publish with a speical tag, e.g. if you are updating proj and don't want to clobber the existing tags, specify a `DOCKER_TAG_PREFIX`. Note you must build with this tag as well.
-
-    # tag and publish geo-ci:proj-9.1.0-rust-1.58, proj-ci:proj-9-1.0-rust-1.58, etc.
-    DOCKER_TAG_PREFIX=proj-9.1.0- make build-all publish-all
