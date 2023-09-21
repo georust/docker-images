@@ -16,7 +16,7 @@ RUN apt-get update \
     clang \
     libcurl4-gnutls-dev \
     libsqlite3-dev \
-    libtiff5-dev \
+    libtiff-dev \
     cmake \
     pkg-config \
     sqlite3 \

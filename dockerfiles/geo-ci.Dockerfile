@@ -22,7 +22,7 @@ RUN apt-get update \
     ca-certificates \
     clang \
     git \
-    libtiff5 \
+    libtiff-dev \
     pkg-config \
   && rm -rf /var/lib/apt/lists/*
 
