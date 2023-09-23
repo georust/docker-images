@@ -3,7 +3,7 @@
 # Builds libproj from source
 
 ARG RUST_VERSION
-FROM rust:$RUST_VERSION
+FROM rust:$RUST_VERSION-bullseye
 
 ARG RUST_VERSION
 ARG PROJ_VERSION
