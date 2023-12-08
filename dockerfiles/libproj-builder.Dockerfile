@@ -3,7 +3,7 @@
 # Builds libproj from source
 
 ARG RUST_VERSION
-FROM rust:$RUST_VERSION
+FROM rust:$RUST_VERSION-bullseye
 
 ARG RUST_VERSION
 ARG PROJ_VERSION
@@ -16,7 +16,7 @@ RUN apt-get update \
     clang \
     libcurl4-gnutls-dev \
     libsqlite3-dev \
-    libtiff5-dev \
+    libtiff-dev \
     cmake \
     pkg-config \
     sqlite3 \
