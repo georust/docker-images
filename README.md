@@ -9,7 +9,7 @@ so it makes sense to support a reasonable window of dependencies.
 
 Unlike a `git tag`, a `tag` in Docker is not conventionally treated as an
 immutable alias to a precise single state. Rather, it's more like a named
-"release track" or "semver constraint". 
+"release track" or "semver constraint".
 
 Using the official Rust Docker containers as an example, the `rust:1.45` tag
 should be read as "the latest container published for rust >=1.45.0 <1.46". The
@@ -77,10 +77,12 @@ then reused by multiple CI containers.
     # All containers will need to be rebuilt when updating proj
     ./run-rust.sh --all -- make build-all
 
-    # I often see intermittent failures when running all the tests at once, but
+    # NOTE: I often see intermittent failures when running all the tests at once, but
     # haven't found time to dig into why this is happening.
     # I typically re-run failed tests by themselves to see if the failures recurs.
     ./run-rust.sh --all -- make test-all
+
+    ./run-rust.sh --all -- make publish-all
 
 ### Update the `proj` crate
 

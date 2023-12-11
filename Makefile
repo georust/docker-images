@@ -1,4 +1,5 @@
 GEORUST_ROOT=$(CURDIR)/..
+PUSH_RATE_LIMIT_DELAY=5
 
 RUST_VERSION ?= $(error RUST_VERSION not set)
 PROJ_VERSION ?= $(error PROJ_VERSION not set)
@@ -35,15 +36,19 @@ publish-all-latest: DOCKER_TAG=latest
 publish-all-latest: publish-all
 
 publish-geo-ci:
+	sleep $(PUSH_RATE_LIMIT_DELAY) && \
 	docker push georust/geo-ci:$(DOCKER_TAG)
 
 publish-proj-ci:
+	sleep $(PUSH_RATE_LIMIT_DELAY) && \
 	docker push georust/proj-ci:$(DOCKER_TAG)
 
 publish-proj-ci-without-system-proj:
+	sleep $(PUSH_RATE_LIMIT_DELAY) && \
 	docker push georust/proj-ci-without-system-proj:$(DOCKER_TAG)
 
 publish-libproj-builder:
+	sleep $(PUSH_RATE_LIMIT_DELAY) && \
 	docker push georust/libproj-builder:$(DOCKER_TAG)
 
 geo-ci-shell:
