@@ -5,7 +5,7 @@ RUST_VERSION ?= $(error RUST_VERSION not set)
 PROJ_VERSION ?= $(error PROJ_VERSION not set)
 DOCKER_TAG=proj-$(PROJ_VERSION)-rust-$(RUST_VERSION)
 
-DOCKER_BUILD_CMD=docker build --build-arg RUST_VERSION=$(RUST_VERSION) --build-arg PROJ_VERSION=$(PROJ_VERSION)
+DOCKER_BUILD_CMD=docker build --platform linux/amd64 --build-arg RUST_VERSION=$(RUST_VERSION) --build-arg PROJ_VERSION=$(PROJ_VERSION)
 DOCKER_RUN_CMD=docker run -v $(GEORUST_ROOT):/tmp/georust -e CARGO_TARGET_DIR=/tmp/cargo-target
 DOCKERFILE_DIR=dockerfiles/
 
