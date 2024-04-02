@@ -7,8 +7,8 @@
 ARG RUST_VERSION
 ARG PROJ_VERSION
 
-FROM georust/libproj-builder:proj-${PROJ_VERSION}-rust-${RUST_VERSION} as libproj-builder
-FROM rust:$RUST_VERSION-bullseye
+FROM ghcr.io/georust/libproj-builder:proj-${PROJ_VERSION}-rust-${RUST_VERSION} as libproj-builder
+FROM rust:$RUST_VERSION-slim-bullseye
 
 ARG RUST_VERSION
 ARG PROJ_VERSION

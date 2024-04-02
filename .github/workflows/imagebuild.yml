@@ -1,0 +1,69 @@
+name: Build and Push Georust Docker Images
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - trying
+  pull_request:
+  merge_group:
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        docker_image_name:
+          - proj-ci
+          - proj-ci-without-system-proj
+          - libproj-builder
+          - geo-ci
+        rust_version: [1.69]
+        proj_version: [9.4.0]
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set Up Builder
+      run: |
+        docker buildx create --name mybuilder
+        docker buildx use mybuilder
+        docker buildx inspect --bootstrap
+
+
+    - name: Build Dockerfile
+      uses: docker/build-push-action@v5
+      with:
+        file: ./dockerfiles/${{ matrix.docker_image_name }}
+        push: false
+        tags: ${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ matrix.proj_version }}-rust-${{ matrix.rust_version }}
+        outputs: type=docker,dest=/tmp/${{ matrix.docker_image_name }}-proj-${{ matrix.proj_version }}-rust-${{ matrix.rust_version }}.tar
+        build-args: |
+              RUST_VERSION=${{ matrix.rust_version }}
+              PROJ_VERSION=${{ matrix.proj_version }}
+    - name: Test image
+      run: |
+        # docker run -v ${{ github.workspace }}:/tmp/georust -e CARGO_TARGET_DIR=/tmp/cargo-target -w /tmp/georust/geo georust/geo-ci:${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ matrix.proj_version }}-rust-${{ matrix.rust_version }} /bin/bash -c "cargo test"
+    - name: Upload Image
+      uses: actions/upload-artifact@v4
+      with:
+          retention-days: 1
+          name: ${{ matrix.docker_image_name }}-proj-${{ matrix.proj_version }}-rust-${{ matrix.rust_version }}
+          path: /tmp/${{ matrix.docker_image_name }}-proj-${{ matrix.proj_version }}-rust-${{ matrix.rust_version }}.tar
+
