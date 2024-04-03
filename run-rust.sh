@@ -84,5 +84,10 @@ done
 
 for key val in "${(@kv)statuses}"
 do
-    echo "$key completed with status: $val"
+    if (( val != 0 )); then
+        echo "ERROR - $key exited with non-zero status: $val"
+        exit $val
+    else
+        "$key completed with status: $val"
+    fi
 done

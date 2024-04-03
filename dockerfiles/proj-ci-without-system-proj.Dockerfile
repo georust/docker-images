@@ -1,4 +1,4 @@
-# https://hub.docker.com/orgs/georust/proj-ci-without-system-proj
+# https://github.com/orgs/georust/packages/container/package/proj-ci-without-system-proj
 
 # This container is based on the libproj-builder container, which has built
 # libproj, and thus has all the dependencies for building proj from source, but
@@ -7,7 +7,7 @@
 ARG RUST_VERSION
 ARG PROJ_VERSION
 
-FROM georust/libproj-builder:proj-${PROJ_VERSION}-rust-${RUST_VERSION}
+FROM ghcr.io/georust/libproj-builder:proj-${PROJ_VERSION}-rust-${RUST_VERSION}
 
 ARG RUST_VERSION
 ARG PROJ_VERSION

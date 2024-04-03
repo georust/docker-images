@@ -1,8 +1,8 @@
-# https://hub.docker.com/orgs/georust/proj-ci
+# https://github.com/orgs/georust/packages/container/package/proj-ci
 
 ARG RUST_VERSION
 ARG PROJ_VERSION
-FROM georust/libproj-builder:proj-${PROJ_VERSION}-rust-${RUST_VERSION}
+FROM ghcr.io/georust/libproj-builder:proj-${PROJ_VERSION}-rust-${RUST_VERSION}
 
 ARG RUST_VERSION
 ARG PROJ_VERSION
