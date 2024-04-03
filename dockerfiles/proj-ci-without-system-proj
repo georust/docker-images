@@ -18,5 +18,5 @@ RUN apt-get update \
   && DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
     clang \
     cmake \
-    libsqlite3-0 \
+    sqlite3 \
   && rm -rf /var/lib/apt/lists/*
