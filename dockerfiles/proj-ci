@@ -1,4 +1,4 @@
-# https://hub.docker.com/orgs/georust/proj-ci
+# https://github.com/orgs/georust/packages/container/package/proj-ci
 
 ARG RUST_VERSION
 ARG PROJ_VERSION

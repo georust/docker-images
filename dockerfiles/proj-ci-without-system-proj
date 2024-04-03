@@ -1,4 +1,4 @@
-# https://hub.docker.com/orgs/georust/proj-ci-without-system-proj
+# https://github.com/orgs/georust/packages/container/package/proj-ci-without-system-proj
 
 # This container is based on the libproj-builder container, which has built
 # libproj, and thus has all the dependencies for building proj from source, but
