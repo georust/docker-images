@@ -24,6 +24,7 @@ RUN apt-get update \
     cmake \
     git \
     libtiff-dev \
+    sqlite3 \
     pkg-config \
   && rm -rf /var/lib/apt/lists/*
 
