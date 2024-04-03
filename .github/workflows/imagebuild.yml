@@ -11,7 +11,8 @@ on:
 
 jobs:
   build_base_image:
-    runs_on: ubuntu-latest
+    name: Build the base image for geo and proj
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -68,6 +69,7 @@ jobs:
 
 
   build_dependent_images:
+    name: Build dependent images for geo and proj
     needs: build_base_image
     runs-on: ubuntu-latest
 
