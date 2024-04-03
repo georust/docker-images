@@ -14,6 +14,7 @@ RUN test -n "$PROJ_VERSION" || (echo "PROJ_VERSION ARG not set" && false)
 RUN apt-get update \
   && DEBIAN_FRONTEND="noninteractive" apt-get install -y \
     clang \
+    git \
     libcurl4-gnutls-dev \
     libsqlite3-dev \
     libtiff-dev \
