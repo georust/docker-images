@@ -122,9 +122,17 @@ jobs:
               RUST_VERSION=${{ matrix.rust_version }}
               PROJ_VERSION=${{ env.LIBPROJ_VERSION }}
 
-    - name: Set up test command
+    - name: Set up test command for geo-ci
       if: contains('geo', ${{ matrix.docker_image_name }})
       run: echo "RUN_CMD=git clone https://github.com/georust/geo.git && cd geo && cargo test --no-default-features && cargo test && cargo test --all-features" >> $GITHUB_ENV
+
+    - name: Set up test command for proj-ci-without-system-proj-ci
+      if: contains('system', ${{ matrix.docker_image_name }})
+      run: echo "RUN_CMD=git clone https://github.com/georust/proj.git && cd geo && cargo test --features bundled_proj" >> $GITHUB_ENV
+
+    - name: Set up test command for proj-ci
+      if: ${{ matrix.docker_image_name }} == proj-ci
+      run: echo "RUN_CMD=git clone https://github.com/georust/proj.git && cd geo && cargo test --no-default-features && cargo test --features bundled_proj && cargo test --features network" >> $GITHUB_ENV
 
     - name: Test ${{ matrix.docker_image_name }}
       run: |
