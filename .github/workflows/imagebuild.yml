@@ -122,9 +122,11 @@ jobs:
               RUST_VERSION=${{ matrix.rust_version }}
               PROJ_VERSION=${{ env.LIBPROJ_VERSION }}
 
-    - name: Test ${{ matrix.docker_image_name }}
+    - name: Set up test command
       if: contains('geo', ${{ matrix.docker_image_name }})
       run: echo "RUN_CMD=git clone https://github.com/georust/geo.git && cd geo && cargo test --no-default-features && cargo test && cargo test --all-features" >> $GITHUB_ENV
+
+    - name: Test ${{ matrix.docker_image_name }}
       run: |
         docker run --rm ghcr.io/${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }} /bin/bash -c "${{ env.RUN_CMD }}" 
 
