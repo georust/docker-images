@@ -30,41 +30,21 @@ number tag as well, e.g. `rust:1.45.1`. Similarly we could publish a new tag
 for each minor patch (`geo-ci:rust-1.50.0`, `geo-ci:rust-1.50.1`, etc.), but
 running CI against each patch seems like overkill at this point.
 
-## How to Update Rust
+**New images are built by Github Actions and published to the Github Container Registry if tests pass**
 
-### Prerequisites
+## How to Update the Rust Version
 
-It's assumed that you have a directory structure containing dependent georust repositories like this:
 
-  $ ls
-  docker-containers  # this repository
-  geo                # needed to run tests
-  proj               # needed to run tests
+### Add a new Rust version
 
-### add a new Rust version
+edit the `.github/workflows/imagebuild.yml` file
 
-    echo "1.69" >> rust-versions.txt
+Add the Rust version you wish to add to the **two** `rust_version` matrices:  
 
-    # build containers
-    ./run-rust.sh 1.69 -- make build-all
+#### Example
 
-    # run some tests on the new containers
-    ./run-rust.sh 1.69 -- make test-all
-
-    # If everythig looks good, you can publish the new tags
-    ./run-rust.sh 1.69 -- make publish-all
-
-    # delete any old unsupported rust versions from the file
-    edit rust-versions.txt
-
-### To update multiple Rust versions in parallel
-
-If you have multiple versions of rust you want to build/test/publish:
-
-    ./run-rust.sh 1.49 1.50 -- make build-all
-
-For more:
-    ./run-rust.sh --help
+    Before:  rust_version: [1.74, 1.75, 1.76]
+    After:  rust_version: [1.74, 1.75, 1.76, 1.77]
 
 ## How to Update Proj
 
@@ -72,17 +52,8 @@ libproj (the cpp lib) is built using the [docker container builder
 pattern](https://docs.docker.com/develop/develop-images/multistage-build/), and
 then reused by multiple CI containers.
 
-    edit proj-version.txt
+    edit the `LIBPROJ_VERSION` variable in `imagebuild.yml
 
-    # All containers will need to be rebuilt when updating proj
-    ./run-rust.sh --all -- make build-all
-
-    # NOTE: I often see intermittent failures when running all the tests at once, but
-    # haven't found time to dig into why this is happening.
-    # I typically re-run failed tests by themselves to see if the failures recurs.
-    ./run-rust.sh --all -- make test-all
-
-    ./run-rust.sh --all -- make publish-all
 
 ### Update the `proj` crate
 
@@ -93,15 +64,4 @@ then reused by multiple CI containers.
 ### Update the `geo` crate
 
 - When the PR has merged and the `proj` crate has been published, you can update [geo](https://github.com/georust/geo) to use the new `proj` crate:
-
-### Publishing docker containers
-
-To publish all the containers for a version of rust:
-
-    # e.g. to publish geo-ci:rust-1.58, proj-ci:rust-1.58, etc.
-    ./run-rust.sh 1.58 -- make publish-all
-
-You can quickly publish multiple versions like this:
-
-    ./run-rust.sh 1.58 1.59 -- make publish-all
 
