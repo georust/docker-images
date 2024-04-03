@@ -59,7 +59,7 @@ jobs:
       run: |
         # docker run --rm ghcr.io/${{ github.repository_owner }}/${{ env.BASE_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
 
-    - name: Push tested multi-platform base image
+    - name: Push tested base image
       uses: docker/build-push-action@v5
       with:
         file: ./dockerfiles/${{ env.BASE_IMAGE_NAME }}
@@ -120,7 +120,7 @@ jobs:
       run: |
         # docker run --rm ghcr.io/${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
 
-    - name: Push tested multi-platform ${{ matrix.docker_image_name }} image
+    - name: Push tested ${{ matrix.docker_image_name }} image
       uses: docker/build-push-action@v5
       with:
         file: ./dockerfiles/${{ matrix.docker_image_name }}
