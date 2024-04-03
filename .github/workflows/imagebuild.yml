@@ -112,7 +112,7 @@ jobs:
       with:
         file: ./dockerfiles/${{ matrix.docker_image_name }}
         push: true
-        tags: ${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
+        tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
         outputs: type=docker,dest=/tmp/${{ matrix.docker_image_name }}-proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}.tar
         build-args: |
               RUST_VERSION=${{ matrix.rust_version }}
