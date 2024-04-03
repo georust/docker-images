@@ -52,7 +52,7 @@ libproj (the cpp lib) is built using the [docker container builder
 pattern](https://docs.docker.com/develop/develop-images/multistage-build/), and
 then reused by multiple CI containers.
 
-    edit the `LIBPROJ_VERSION` variable in `imagebuild.yml
+    edit the `LIBPROJ_VERSION` variable in `imagebuild.yml`
 
 
 ### Update the `proj` crate
