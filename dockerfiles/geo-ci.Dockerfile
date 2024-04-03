@@ -1,4 +1,4 @@
-# https://hub.docker.com/orgs/georust/geo-ci
+# https://github.com/orgs/georust/packages/container/package/geo-ci
 
 # ------------------------------------------------------------------------------
 # Final stage
@@ -7,7 +7,7 @@
 ARG RUST_VERSION
 ARG PROJ_VERSION
 
-FROM georust/libproj-builder:proj-${PROJ_VERSION}-rust-${RUST_VERSION} as libproj-builder
+FROM ghcr.io/georust/libproj-builder:proj-${PROJ_VERSION}-rust-${RUST_VERSION} as libproj-builder
 FROM rust:$RUST_VERSION-bullseye
 
 ARG RUST_VERSION

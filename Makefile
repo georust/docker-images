@@ -19,16 +19,16 @@ default: build-all
 build-all: libproj-builder proj-ci-without-system-proj proj-ci geo-ci
 
 geo-ci:
-	$(DOCKER_BUILD_CMD) -f $(DOCKERFILE_DIR)geo-ci.Dockerfile -t georust/geo-ci:$(DOCKER_TAG) .
+	$(DOCKER_BUILD_CMD) -f $(DOCKERFILE_DIR)geo-ci.Dockerfile -t ghcr.io/georust/geo-ci:$(DOCKER_TAG) .
 
 proj-ci:
-	$(DOCKER_BUILD_CMD) -f $(DOCKERFILE_DIR)proj-ci.Dockerfile -t georust/proj-ci:$(DOCKER_TAG) .
+	$(DOCKER_BUILD_CMD) -f $(DOCKERFILE_DIR)proj-ci.Dockerfile -t ghcr.io/georust/proj-ci:$(DOCKER_TAG) .
 
 proj-ci-without-system-proj:
-	$(DOCKER_BUILD_CMD) -f $(DOCKERFILE_DIR)proj-ci-without-system-proj.Dockerfile -t georust/proj-ci-without-system-proj:$(DOCKER_TAG) .
+	$(DOCKER_BUILD_CMD) -f $(DOCKERFILE_DIR)proj-ci-without-system-proj.Dockerfile -t ghcr.io/georust/proj-ci-without-system-proj:$(DOCKER_TAG) .
 
 libproj-builder:
-	$(DOCKER_BUILD_CMD) -f $(DOCKERFILE_DIR)libproj-builder.Dockerfile -t georust/libproj-builder:$(DOCKER_TAG) .
+	$(DOCKER_BUILD_CMD) -f $(DOCKERFILE_DIR)libproj-builder.Dockerfile -t ghcr.io/georust/libproj-builder:$(DOCKER_TAG) .
 
 publish-all: publish-libproj-builder publish-proj-ci-without-system-proj publish-proj-ci publish-geo-ci
 
