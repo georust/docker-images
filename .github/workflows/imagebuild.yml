@@ -45,8 +45,21 @@ jobs:
         docker buildx use mybuilder
         docker buildx inspect --bootstrap
 
-    - name: Build and push base Dockerfile
-      id: basebuild
+    - name: Build and export base image to Docker
+      uses: docker/build-push-action@v5
+      with:
+        file: ./dockerfiles/${{ env.BASE_IMAGE_NAME }}
+        load: true
+        tags: ghcr.io/${{ github.repository_owner }}/${{ env.BASE_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
+        build-args: |
+              RUST_VERSION=${{ matrix.rust_version }}
+              PROJ_VERSION=${{ env.LIBPROJ_VERSION }}
+
+    - name: Test base image
+      run: |
+        # docker run --rm ghcr.io/${{ github.repository_owner }}/${{ env.BASE_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
+
+    - name: Push tested multi-platform base image
       uses: docker/build-push-action@v5
       with:
         platforms: linux/amd64,linux/arm64
@@ -57,20 +70,6 @@ jobs:
         build-args: |
               RUST_VERSION=${{ matrix.rust_version }}
               PROJ_VERSION=${{ env.LIBPROJ_VERSION }}
-
-    - name: Test base image
-      if: steps.basebuild.outcome == 'success'
-      run: |
-        # docker run -v ${{ github.workspace }}:/tmp/georust -e CARGO_TARGET_DIR=/tmp/cargo-target -w /tmp/georust/geo georust/${{ env.BASE_IMAGE_NAME }}:${{ github.repository_owner }}/${{ env.BASE_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }} /bin/bash -c "cargo test"
-    - name: Upload Image to artifact cache
-      if: steps.basebuild.outcome == 'success'
-      uses: actions/upload-artifact@v4
-      with:
-          retention-days: 1
-          name: ${{ env.BASE_IMAGE_NAME }}-proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
-          path: /tmp/${{ env.BASE_IMAGE_NAME }}-proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}.tar
-
-
 
   build_dependent_images:
     name: Build dependent images for geo and proj
@@ -111,6 +110,20 @@ jobs:
     - name: Build ${{ matrix.docker_image_name }}
       uses: docker/build-push-action@v5
       with:
+        file: ./dockerfiles/${{ matrix.docker_image_name }}
+        load: true
+        tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
+        build-args: |
+              RUST_VERSION=${{ matrix.rust_version }}
+              PROJ_VERSION=${{ env.LIBPROJ_VERSION }}
+
+    - name: Test ${{ matrix.docker_image_name }}
+      run: |
+        # docker run --rm ghcr.io/${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
+
+    - name: Push tested multi-platform ${{ matrix.docker_image_name }} image
+      uses: docker/build-push-action@v5
+      with:
         platforms: linux/amd64,linux/arm64
         file: ./dockerfiles/${{ matrix.docker_image_name }}
         push: true
@@ -119,14 +132,3 @@ jobs:
         build-args: |
               RUST_VERSION=${{ matrix.rust_version }}
               PROJ_VERSION=${{ env.LIBPROJ_VERSION }}
-
-    - name: Test ${{ matrix.docker_image_name }} image
-      run: |
-        # docker run -v ${{ github.workspace }}:/tmp/georust -e CARGO_TARGET_DIR=/tmp/cargo-target -w /tmp/georust/geo georust/geo-ci:${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }} /bin/bash -c "cargo test"
-    - name: Upload Image to artifact cache
-      uses: actions/upload-artifact@v4
-      with:
-          retention-days: 1
-          name: ${{ matrix.docker_image_name }}-proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
-          path: /tmp/${{ matrix.docker_image_name }}-proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}.tar
-
