@@ -49,7 +49,9 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         file: ./dockerfiles/${{ env.BASE_IMAGE_NAME }}
+        push: false
         load: true
+        platform: linux/amd64
         tags: ghcr.io/${{ github.repository_owner }}/${{ env.BASE_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
         build-args: |
               RUST_VERSION=${{ matrix.rust_version }}
@@ -64,6 +66,8 @@ jobs:
       with:
         file: ./dockerfiles/${{ env.BASE_IMAGE_NAME }}
         push: true
+        load: false
+        platform: linux/amd64,linux/arm64
         tags: ghcr.io/${{ github.repository_owner }}/${{ env.BASE_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
         outputs: type=docker,dest=/tmp/${{ env.BASE_IMAGE_NAME }}-proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}.tar
         build-args: |
@@ -110,7 +114,9 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         file: ./dockerfiles/${{ matrix.docker_image_name }}
+        push: false
         load: true
+        platform: linux/amd64
         tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
         build-args: |
               RUST_VERSION=${{ matrix.rust_version }}
@@ -125,6 +131,8 @@ jobs:
       with:
         file: ./dockerfiles/${{ matrix.docker_image_name }}
         push: true
+        load: false
+        platform: linux/amd64,linux/arm64
         tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
         outputs: type=docker,dest=/tmp/${{ matrix.docker_image_name }}-proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}.tar
         build-args: |
