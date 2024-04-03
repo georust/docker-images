@@ -115,7 +115,7 @@ jobs:
       with:
         file: ./dockerfiles/libproj-builder
         push: true
-        tags: ${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ matrix.proj_version }}-rust-${{ matrix.rust_version }}
+        tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ matrix.proj_version }}-rust-${{ matrix.rust_version }}
         outputs: type=docker,dest=/tmp/${{ matrix.docker_image_name }}-proj-${{ matrix.proj_version }}-rust-${{ matrix.rust_version }}.tar
         build-args: |
               RUST_VERSION=${{ matrix.rust_version }}
