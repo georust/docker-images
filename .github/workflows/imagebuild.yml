@@ -18,9 +18,8 @@ jobs:
         docker_image_name:
           - proj-ci
           - proj-ci-without-system-proj
-          - libproj-builder
           - geo-ci
-        rust_version: [1.69]
+        rust_version: [1.77]
         proj_version: [9.4.0]
 
     steps:
@@ -47,7 +46,33 @@ jobs:
         docker buildx inspect --bootstrap
 
 
-    - name: Build Dockerfile
+    - name: Build and push base Dockerfile
+    - id: basebuild
+      uses: docker/build-push-action@v5
+      with:
+        file: ./dockerfiles/libproj-builder
+        push: true
+        tags: ${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ matrix.proj_version }}-rust-${{ matrix.rust_version }}
+        outputs: type=docker,dest=/tmp/${{ matrix.docker_image_name }}-proj-${{ matrix.proj_version }}-rust-${{ matrix.rust_version }}.tar
+        build-args: |
+              RUST_VERSION=${{ matrix.rust_version }}
+              PROJ_VERSION=${{ matrix.proj_version }}
+
+    - name: Test image
+      if: steps.basebuild.outcome == 'success'
+      run: |
+        # docker run -v ${{ github.workspace }}:/tmp/georust -e CARGO_TARGET_DIR=/tmp/cargo-target -w /tmp/georust/geo georust/geo-ci:${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ matrix.proj_version }}-rust-${{ matrix.rust_version }} /bin/bash -c "cargo test"
+    - name: Upload Image
+      if: steps.basebuild.outcome == 'success'
+      uses: actions/upload-artifact@v4
+      with:
+          retention-days: 1
+          name: ${{ matrix.docker_image_name }}-proj-${{ matrix.proj_version }}-rust-${{ matrix.rust_version }}
+          path: /tmp/${{ matrix.docker_image_name }}-proj-${{ matrix.proj_version }}-rust-${{ matrix.rust_version }}.tar
+
+
+    - name: Build geo and proj Dockerfiles
+      if: steps.basebuild.outcome == 'success'
       uses: docker/build-push-action@v5
       with:
         file: ./dockerfiles/${{ matrix.docker_image_name }}
