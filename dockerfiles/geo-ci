@@ -21,6 +21,7 @@ RUN apt-get update \
   && DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
     ca-certificates \
     clang \
+    cmake \
     git \
     libtiff-dev \
     pkg-config \
