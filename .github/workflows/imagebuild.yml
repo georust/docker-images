@@ -128,11 +128,11 @@ jobs:
 
     - name: Set up test command for proj-ci-without-system-proj-ci
       if: contains('system', ${{ matrix.docker_image_name }})
-      run: echo "RUN_CMD=git clone https://github.com/georust/proj.git && cd geo && cargo test --features bundled_proj" >> $GITHUB_ENV
+      run: echo "RUN_CMD=git clone https://github.com/georust/proj.git && cd proj && cargo test --features bundled_proj" >> $GITHUB_ENV
 
     - name: Set up test command for proj-ci
       if: ${{ matrix.docker_image_name }} == proj-ci
-      run: echo "RUN_CMD=git clone https://github.com/georust/proj.git && cd geo && cargo test --no-default-features && cargo test --features bundled_proj && cargo test --features network" >> $GITHUB_ENV
+      run: echo "RUN_CMD=git clone https://github.com/georust/proj.git && cd proj && cargo test --no-default-features && cargo test --features bundled_proj && cargo test --features network" >> $GITHUB_ENV
 
     - name: Test ${{ matrix.docker_image_name }}
       run: |
