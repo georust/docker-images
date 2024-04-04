@@ -11,11 +11,11 @@ on:
 
 env:
   LIBPROJ_VERSION: 9.4.0
-  BASE_IMAGE_NAME: libproj-builder
+  MAIN_IMAGE_NAME: libproj-builder
 
 jobs:
-  build_base_image:
-    name: Build the base image for geo and proj
+  build_main_image:
+    name: Build the main image for geo and proj
     runs-on: ubuntu-latest
 
     strategy:
@@ -45,46 +45,43 @@ jobs:
         docker buildx use mybuilder
         docker buildx inspect --bootstrap
 
-    - name: Build and export base image to Docker
+    - name: Build and export main image to Docker
       uses: docker/build-push-action@v5
       with:
-        file: ./dockerfiles/${{ env.BASE_IMAGE_NAME }}
+        file: ./dockerfiles/${{ env.MAIN_IMAGE_NAME }}
         push: false
         load: true
         platforms: linux/amd64
-        tags: ghcr.io/${{ github.repository_owner }}/${{ env.BASE_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
+        tags: ghcr.io/${{ github.repository_owner }}/${{ env.MAIN_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
         build-args: |
               RUST_VERSION=${{ matrix.rust_version }}
               PROJ_VERSION=${{ env.LIBPROJ_VERSION }}
 
-    - name: Test base image
-      run: |
-        # docker run --rm ghcr.io/${{ github.repository_owner }}/${{ env.BASE_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
-
-    - name: Push tested base image
+    - name: Push main image
       uses: docker/build-push-action@v5
       with:
-        file: ./dockerfiles/${{ env.BASE_IMAGE_NAME }}
+        file: ./dockerfiles/${{ env.MAIN_IMAGE_NAME }}
         push: true
         load: false
         # platforms: linux/amd64,linux/arm64
-        tags: ghcr.io/${{ github.repository_owner }}/${{ env.BASE_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
-        outputs: type=docker,dest=/tmp/${{ env.BASE_IMAGE_NAME }}-proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}.tar
+        tags: ghcr.io/${{ github.repository_owner }}/${{ env.MAIN_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
+        outputs: type=docker,dest=/tmp/${{ env.MAIN_IMAGE_NAME }}-proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}.tar
         build-args: |
               RUST_VERSION=${{ matrix.rust_version }}
               PROJ_VERSION=${{ env.LIBPROJ_VERSION }}
 
   build_dependent_images:
     name: Build dependent images for geo and proj
-    needs: build_base_image
+    needs: build_main_image
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        docker_image_name:
-          - proj-ci
-          - proj-ci-without-system-proj
-          - geo-ci
+        subimages: [
+          {image: geo-ci, testcmd: "git clone https://github.com/georust/geo && cd geo && cargo test --no-default-features && cargo test && cargo test --all-features"},
+          {image: proj-ci, testcmd: "git clone https://github.com/georust/proj && cd proj && cargo test --no-default-features && cargo test --features bundled_proj && cargo test --features network"},
+          {image: proj-ci-without-system-proj, testcmd: "git clone https://github.com/georust/proj && cd proj && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1 cargo test --features bundled_proj"}
+          ]
         rust_version: [1.77]
 
     steps:
@@ -110,43 +107,31 @@ jobs:
         docker buildx use mybuilder
         docker buildx inspect --bootstrap
 
-    - name: Build ${{ matrix.docker_image_name }}
+    - name: Build ${{ matrix.subimages.image }}
       uses: docker/build-push-action@v5
       with:
-        file: ./dockerfiles/${{ matrix.docker_image_name }}
+        file: ./dockerfiles/${{ matrix.subimages.image }}
         push: false
         load: true
         platforms: linux/amd64
-        tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
+        tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.subimages.image }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
         build-args: |
               RUST_VERSION=${{ matrix.rust_version }}
               PROJ_VERSION=${{ env.LIBPROJ_VERSION }}
 
-    - name: Set up test command for geo-ci
-      if: contains('geo', ${{ matrix.docker_image_name }})
-      run: echo "RUN_CMD=git clone https://github.com/georust/geo.git && cd geo && cargo test --no-default-features && cargo test && cargo test --all-features" >> $GITHUB_ENV
-
-    - name: Set up test command for proj-ci-without-system-proj-ci
-      if: contains('system', ${{ matrix.docker_image_name }})
-      run: echo "RUN_CMD=git clone https://github.com/georust/proj.git && cd proj && cargo test --features bundled_proj" >> $GITHUB_ENV
-
-    - name: Set up test command for proj-ci
-      if: ${{ matrix.docker_image_name }} == proj-ci
-      run: echo "RUN_CMD=git clone https://github.com/georust/proj.git && cd proj && cargo test --no-default-features && cargo test --features bundled_proj && cargo test --features network" >> $GITHUB_ENV
-
-    - name: Test ${{ matrix.docker_image_name }}
+    - name: Test ${{ matrix.subimages.image }}
       run: |
-        docker run --rm ghcr.io/${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }} /bin/bash -c "${{ env.RUN_CMD }}" 
+        docker run --rm ghcr.io/${{ github.repository_owner }}/${{ matrix.subimages.image }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }} /bin/bash -c "${{ matrix.subimages.testcmd }}"
 
-    - name: Push tested ${{ matrix.docker_image_name }} image
+    - name: Push tested ${{ matrix.subimages.image }} image
       uses: docker/build-push-action@v5
       with:
-        file: ./dockerfiles/${{ matrix.docker_image_name }}
+        file: ./dockerfiles/${{ matrix.subimages.image }}
         push: true
         load: false
         # platforms: linux/amd64,linux/arm64
-        tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.docker_image_name }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
-        outputs: type=docker,dest=/tmp/${{ matrix.docker_image_name }}-proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}.tar
+        tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.subimages.image }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
+        outputs: type=docker,dest=/tmp/${{ matrix.subimages.image }}-proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}.tar
         build-args: |
               RUST_VERSION=${{ matrix.rust_version }}
               PROJ_VERSION=${{ env.LIBPROJ_VERSION }}
