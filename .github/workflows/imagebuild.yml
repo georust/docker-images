@@ -22,7 +22,7 @@ jobs:
 
     strategy:
       matrix:
-        rust_version: ["1.70", 1.76, 1.77]
+        rust_version: ["1.74", "1.78", "1.79"]
 
     steps:
     - name: Check out repository
@@ -49,6 +49,7 @@ jobs:
       with:
         file: ./dockerfiles/${{ env.MAIN_IMAGE_NAME }}
         push: false
+        pull: true
         load: true
         platforms: linux/amd64
         tags: ghcr.io/${{ github.repository_owner }}/${{ env.MAIN_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
@@ -81,7 +82,7 @@ jobs:
           {image: proj-ci, testcmd: "git clone https://github.com/georust/proj && cd proj && cargo test --no-default-features && cargo test --features bundled_proj && cargo test --features network && cd proj-sys && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=0 cargo test && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1 cargo test --features bundled_proj"},
           {image: proj-ci-without-system-proj, testcmd: "git clone https://github.com/georust/proj && cd proj && cargo test --features bundled_proj && cd proj-sys && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1 cargo test"}
           ]
-        rust_version: ["1.70", 1.76, 1.77]
+        rust_version: ["1.74", "1.78", "1.79"]
 
     steps:
     - name: Check out repository
