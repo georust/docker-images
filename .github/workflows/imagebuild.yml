@@ -12,7 +12,7 @@ on:
   merge_group:
 
 env:
-  LIBPROJ_VERSION: 9.4.0
+  LIBPROJ_VERSION: 9.5.0
   MAIN_IMAGE_NAME: libproj-builder
 
 jobs:
