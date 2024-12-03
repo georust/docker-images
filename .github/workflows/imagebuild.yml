@@ -22,7 +22,7 @@ jobs:
 
     strategy:
       matrix:
-        rust_version: ["1.75", "1.78", "1.79"]
+        rust_version: ["1.75", "1.82", "1.83"]
 
     steps:
     - name: Check out repository
