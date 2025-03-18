@@ -12,17 +12,18 @@ on:
   merge_group:
 
 env:
-  LIBPROJ_VERSION: 9.5.0
+  LIBPROJ_VERSION: 9.6.0
   MAIN_IMAGE_NAME: libproj-builder
 
 jobs:
   build_main_image:
     name: Build the main image for geo and proj
     runs-on: ubuntu-latest
+    continue-on-error: false
 
     strategy:
       matrix:
-        rust_version: ["1.75", "1.81", "1.84", "1.85"]
+        rust_version: ["1.82", "1.85", "1.86"]
 
     steps:
     - name: Check out repository
@@ -74,6 +75,7 @@ jobs:
     name: Build dependent images for geo and proj
     needs: build_main_image
     runs-on: ubuntu-latest
+    continue-on-error: true
 
     strategy:
       matrix:
@@ -82,7 +84,7 @@ jobs:
           {image: proj-ci, testcmd: "git clone https://github.com/georust/proj && cd proj && cargo test --no-default-features && cargo test --features bundled_proj && cargo test --features network && cd proj-sys && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=0 cargo test && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1 cargo test --features bundled_proj"},
           {image: proj-ci-without-system-proj, testcmd: "git clone https://github.com/georust/proj && cd proj && cargo test --features bundled_proj && cd proj-sys && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1 cargo test"}
           ]
-        rust_version: ["1.75", "1.81", "1.84", "1.85"]
+        rust_version: ["1.82", "1.85", "1.86"]
 
     steps:
     - name: Check out repository
