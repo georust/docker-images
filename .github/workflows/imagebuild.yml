@@ -23,7 +23,7 @@ jobs:
 
     strategy:
       matrix:
-        rust_version: ["1.82", "1.85", "1.86"]
+        rust_version: ["1.83", "1.86", "1.87"]
 
     steps:
     - name: Check out repository
@@ -84,7 +84,7 @@ jobs:
           {image: proj-ci, testcmd: "git clone https://github.com/georust/proj && cd proj && cargo test --no-default-features && cargo test --features bundled_proj && cargo test --features network && cd proj-sys && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=0 cargo test && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1 cargo test --features bundled_proj"},
           {image: proj-ci-without-system-proj, testcmd: "git clone https://github.com/georust/proj && cd proj && cargo test --features bundled_proj && cd proj-sys && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1 cargo test"}
           ]
-        rust_version: ["1.82", "1.85", "1.86"]
+        rust_version: ["1.83", "1.86", "1.87"]
 
     steps:
     - name: Check out repository
