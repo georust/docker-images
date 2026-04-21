@@ -32,6 +32,26 @@ running CI against each patch seems like overkill at this point.
 
 **New images are built by Github Actions and published to the Github Container Registry if tests pass**
 
+## CI Workflow
+
+The pipeline in `.github/workflows/imagebuild.yml` has two stages:
+
+1. `build_main_image` builds `libproj-builder` for each Rust version in the
+   matrix and writes it to an OCI tarball, which is uploaded as a workflow
+   artifact. On pushes to `main` the same image is also published to
+   `ghcr.io/georust/libproj-builder:proj-<PROJ_VERSION>-rust-<RUST_VERSION>`.
+   The `type=gha` buildx cache is shared between the export and push steps so
+   the main-branch push is a cache hit rather than a full rebuild.
+
+2. `build_dependent_images` downloads the matching `libproj-builder` artifact,
+   extracts it to an OCI layout on the runner, then builds each dependent
+   image (`geo-ci`, `proj-ci`, `proj-ci-without-system-proj`). The dependent
+   Dockerfiles keep `FROM ghcr.io/georust/libproj-builder:...`, but buildx's
+   `build-contexts` input redirects that reference to the local OCI layout.
+   This is how PRs that introduce a new Rust version can build the dependent
+   images without the base image yet existing on `ghcr.io`. Pushes to `main`
+   then publish the tested dependent images to `ghcr.io` as well.
+
 ## How to Update the Rust Version
 
 

@@ -26,7 +26,7 @@ jobs:
         # Include the 2 latest rust versions, plus all the MSRV from the following crates:
         #  - proj: https://github.com/georust/proj/blob/main/.github/workflows/test.yml
         #  - geo / geo-types: https://github.com/georust/geo/blob/main/.github/workflows/test.yml
-        rust_version: ["1.82", "1.85", "1.92", "1.93"]
+        rust_version: ["1.82", "1.88", "1.92", "1.93"]
 
     steps:
     - name: Check out repository
@@ -48,29 +48,36 @@ jobs:
         docker buildx use mybuilder
         docker buildx inspect --bootstrap
 
-    - name: Build and export main image to Docker
+    - name: Build and export base image as OCI tarball
       uses: docker/build-push-action@v6
       with:
         file: ./dockerfiles/${{ env.MAIN_IMAGE_NAME }}
-        push: false
         pull: true
-        load: true
         platforms: linux/amd64
         tags: ghcr.io/${{ github.repository_owner }}/${{ env.MAIN_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
+        outputs: type=oci,dest=/tmp/${{ env.MAIN_IMAGE_NAME }}-rust-${{ matrix.rust_version }}.tar
+        cache-to: type=gha,mode=max,scope=main-${{ matrix.rust_version }}
+        cache-from: type=gha,scope=main-${{ matrix.rust_version }}
         build-args: |
               RUST_VERSION=${{ matrix.rust_version }}
               PROJ_VERSION=${{ env.LIBPROJ_VERSION }}
 
-    - name: Push main image
+    - name: Upload base image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.MAIN_IMAGE_NAME }}-rust-${{ matrix.rust_version }}
+        path: /tmp/${{ env.MAIN_IMAGE_NAME }}-rust-${{ matrix.rust_version }}.tar
+        retention-days: 1
+
+    - name: Push base image
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: docker/build-push-action@v6
       with:
         file: ./dockerfiles/${{ env.MAIN_IMAGE_NAME }}
         push: true
-        load: false
         # platforms: linux/amd64,linux/arm64
         tags: ghcr.io/${{ github.repository_owner }}/${{ env.MAIN_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
-        outputs: type=docker,dest=/tmp/${{ env.MAIN_IMAGE_NAME }}-proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}.tar
+        cache-from: type=gha,scope=main-${{ matrix.rust_version }}
         build-args: |
               RUST_VERSION=${{ matrix.rust_version }}
               PROJ_VERSION=${{ env.LIBPROJ_VERSION }}
@@ -88,7 +95,7 @@ jobs:
           {image: proj-ci, testcmd: "git clone https://github.com/georust/proj && cd proj && cargo test --no-default-features && cargo test --features bundled_proj && cargo test --features network && cd proj-sys && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=0 cargo test && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1 cargo test --features bundled_proj"},
           {image: proj-ci-without-system-proj, testcmd: "git clone https://github.com/georust/proj && cd proj && cargo test --features bundled_proj && cd proj-sys && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1 cargo test"}
           ]
-        rust_version: ["1.85", "1.92", "1.93"]
+        rust_version: ["1.88", "1.92", "1.93"]
 
     steps:
     - name: Check out repository
@@ -110,6 +117,17 @@ jobs:
         docker buildx use mybuilder
         docker buildx inspect --bootstrap
 
+    - name: Download base image artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ env.MAIN_IMAGE_NAME }}-rust-${{ matrix.rust_version }}
+        path: /tmp/main-image
+
+    - name: Extract OCI layout
+      run: |
+        mkdir -p /tmp/oci
+        tar -xf /tmp/main-image/${{ env.MAIN_IMAGE_NAME }}-rust-${{ matrix.rust_version }}.tar -C /tmp/oci
+
     - name: Build ${{ matrix.subimages.image }}
       uses: docker/build-push-action@v6
       with:
@@ -118,6 +136,8 @@ jobs:
         load: true
         platforms: linux/amd64
         tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.subimages.image }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
+        build-contexts: |
+          ghcr.io/${{ github.repository_owner }}/${{ env.MAIN_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}=oci-layout:///tmp/oci
         build-args: |
               RUST_VERSION=${{ matrix.rust_version }}
               PROJ_VERSION=${{ env.LIBPROJ_VERSION }}
@@ -132,10 +152,10 @@ jobs:
       with:
         file: ./dockerfiles/${{ matrix.subimages.image }}
         push: true
-        load: false
         # platforms: linux/amd64,linux/arm64
         tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.subimages.image }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
-        outputs: type=docker,dest=/tmp/${{ matrix.subimages.image }}-proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}.tar
+        build-contexts: |
+          ghcr.io/${{ github.repository_owner }}/${{ env.MAIN_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}=oci-layout:///tmp/oci
         build-args: |
               RUST_VERSION=${{ matrix.rust_version }}
               PROJ_VERSION=${{ env.LIBPROJ_VERSION }}
