@@ -3,7 +3,7 @@
 # Builds libproj from source
 
 ARG RUST_VERSION
-FROM rust:$RUST_VERSION-bullseye
+FROM rust:$RUST_VERSION-slim-bookworm
 
 ARG RUST_VERSION
 ARG PROJ_VERSION
@@ -11,14 +11,19 @@ RUN test -n "$RUST_VERSION" || (echo "RUST_VERSION ARG not set" && false)
 RUN test -n "$PROJ_VERSION" || (echo "PROJ_VERSION ARG not set" && false)
 
 # Install dependencies
+#
+# The dev packages stay installed because the proj-ci images build PROJ from
+# source with the `bundled_proj` feature and need them.
 RUN apt-get update \
-  && DEBIAN_FRONTEND="noninteractive" apt-get install -y \
-    clang \
+  && DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
+    ca-certificates \
+    cmake \
+    g++ \
     git \
     libcurl4-gnutls-dev \
     libsqlite3-dev \
     libtiff-dev \
-    cmake \
+    make \
     pkg-config \
     sqlite3 \
     wget \
@@ -39,14 +44,14 @@ RUN apt-get update \
 #    ...
 #    COPY --from=libproj-builder /build/usr /usr
 #    ...
-RUN wget https://github.com/OSGeo/PROJ/releases/download/${PROJ_VERSION}/proj-${PROJ_VERSION}.tar.gz
-RUN tar -xzvf proj-${PROJ_VERSION}.tar.gz
-RUN mv proj-${PROJ_VERSION} proj-src
-
-# from https://proj.org/install.html
-RUN mkdir /proj-src/build
-WORKDIR /proj-src/build
-RUN cmake .. -DCMAKE_INSTALL_PREFIX=/build/usr
-RUN cmake --build . --target install -j $(nproc)
-
-RUN rm -fr /proj-src
+#
+# Download, build and remove the source in one layer so that the source tree
+# does not remain in the image.
+RUN wget -q https://github.com/OSGeo/PROJ/releases/download/${PROJ_VERSION}/proj-${PROJ_VERSION}.tar.gz \
+  && tar -xzf proj-${PROJ_VERSION}.tar.gz \
+  && mkdir proj-${PROJ_VERSION}/build \
+  && cd proj-${PROJ_VERSION}/build \
+  && cmake .. -DCMAKE_INSTALL_PREFIX=/build/usr -DBUILD_TESTING=OFF \
+  && cmake --build . --target install -j $(nproc) \
+  && cd / \
+  && rm -fr proj-${PROJ_VERSION} proj-${PROJ_VERSION}.tar.gz

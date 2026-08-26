@@ -8,24 +8,24 @@ ARG RUST_VERSION
 ARG PROJ_VERSION
 
 FROM ghcr.io/georust/libproj-builder:proj-${PROJ_VERSION}-rust-${RUST_VERSION} as libproj-builder
-FROM rust:$RUST_VERSION-bullseye
+FROM rust:$RUST_VERSION-slim-bookworm
 
 ARG RUST_VERSION
 ARG PROJ_VERSION
 RUN test -n "$RUST_VERSION" || (echo "RUST_VERSION ARG not set" && false)
 RUN test -n "$PROJ_VERSION" || (echo "PROJ_VERSION ARG not set" && false)
 
-# clang and libtiff5 are needed to build geo with `--features use-proj`
-# note: I think we can remove clang if we make bindgen optional, see https://github.com/georust/proj-sys/issues/24
+# libproj's pkg-config file lists sqlite3, libtiff-4 and libcurl in
+# Requires.private, so their dev packages must be present for proj-sys to find
+# the system libproj.
 RUN apt-get update \
   && DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
     ca-certificates \
-    clang \
-    cmake \
     git \
+    libcurl4-gnutls-dev \
+    libsqlite3-dev \
     libtiff-dev \
     pkg-config \
   && rm -rf /var/lib/apt/lists/*
 
 COPY --from=libproj-builder /build/usr /usr
-
