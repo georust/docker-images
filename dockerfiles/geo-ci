@@ -17,10 +17,12 @@ RUN test -n "$PROJ_VERSION" || (echo "PROJ_VERSION ARG not set" && false)
 
 # libproj's pkg-config file lists sqlite3, libtiff-4 and libcurl in
 # Requires.private, so their dev packages must be present for proj-sys to find
-# the system libproj.
+# the system libproj. The link-cplusplus build script, which proj-sys uses,
+# compiles C++ and must have g++.
 RUN apt-get update \
   && DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
     ca-certificates \
+    g++ \
     git \
     libcurl4-gnutls-dev \
     libsqlite3-dev \
