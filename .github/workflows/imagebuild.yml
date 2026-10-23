@@ -25,8 +25,8 @@ jobs:
       matrix:
         # Include the 2 latest rust versions, plus all the MSRV from the following crates:
         #  - proj: https://github.com/georust/proj/blob/main/.github/workflows/test.yml
-        #  - geo / geo-types: https://github.com/georust/geo/blob/main/.github/workflows/test.yml
-        rust_version: ["1.82", "1.85", "1.88", "1.97", "1.98"]
+        #  - geo: https://github.com/georust/geo/blob/main/.github/workflows/test.yml
+        rust_version: ["1.88", "1.98", "1.99"]
 
     steps:
     - name: Check out repository
@@ -90,12 +90,15 @@ jobs:
 
     strategy:
       matrix:
-        subimages: [
-          {image: geo-ci, testcmd: "git clone https://github.com/georust/geo && cd geo && cargo test --no-default-features && cargo test && cargo test --all-features"},
-          {image: proj-ci, testcmd: "git clone https://github.com/georust/proj && cd proj && cargo test --no-default-features && cargo test --features bundled_proj && cargo test --features network && cd proj-sys && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=0 cargo test && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1 cargo test --features bundled_proj"},
-          {image: proj-ci-without-system-proj, testcmd: "git clone https://github.com/georust/proj && cd proj && cargo test --features bundled_proj && cd proj-sys && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1 cargo test"}
-          ]
-        rust_version: ["1.85", "1.88", "1.97", "1.98"]
+        image: [geo-ci, proj-ci, proj-ci-without-system-proj]
+        rust_version: ["1.88", "1.98", "1.99"]
+        include:
+          - image: geo-ci
+            testcmd: "git clone https://github.com/georust/geo && cd geo && cargo test --no-default-features && cargo test && cargo test --all-features"
+          - image: proj-ci
+            testcmd: "git clone https://github.com/georust/proj && cd proj && cargo test --no-default-features && cargo test --features bundled_proj && cargo test --features network && cd proj-sys && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=0 cargo test && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1 cargo test --features bundled_proj"
+          - image: proj-ci-without-system-proj
+            testcmd: "git clone https://github.com/georust/proj && cd proj && cargo test --features bundled_proj && cd proj-sys && _PROJ_SYS_TEST_EXPECT_BUILD_FROM_SRC=1 cargo test"
 
     steps:
     - name: Check out repository
@@ -128,32 +131,32 @@ jobs:
         mkdir -p /tmp/oci
         tar -xf /tmp/main-image/${{ env.MAIN_IMAGE_NAME }}-rust-${{ matrix.rust_version }}.tar -C /tmp/oci
 
-    - name: Build ${{ matrix.subimages.image }}
+    - name: Build ${{ matrix.image }}
       uses: docker/build-push-action@v7
       with:
-        file: ./dockerfiles/${{ matrix.subimages.image }}
+        file: ./dockerfiles/${{ matrix.image }}
         push: false
         load: true
         platforms: linux/amd64
-        tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.subimages.image }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
+        tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
         build-contexts: |
           ghcr.io/${{ github.repository_owner }}/${{ env.MAIN_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}=oci-layout:///tmp/oci
         build-args: |
               RUST_VERSION=${{ matrix.rust_version }}
               PROJ_VERSION=${{ env.LIBPROJ_VERSION }}
 
-    - name: Test ${{ matrix.subimages.image }}
+    - name: Test ${{ matrix.image }}
       run: |
-        docker run --rm ghcr.io/${{ github.repository_owner }}/${{ matrix.subimages.image }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }} /bin/bash -c "${{ matrix.subimages.testcmd }}"
+        docker run --rm ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }} /bin/bash -c "${{ matrix.testcmd }}"
 
-    - name: Push tested ${{ matrix.subimages.image }} image
+    - name: Push tested ${{ matrix.image }} image
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: docker/build-push-action@v7
       with:
-        file: ./dockerfiles/${{ matrix.subimages.image }}
+        file: ./dockerfiles/${{ matrix.image }}
         push: true
         # platforms: linux/amd64,linux/arm64
-        tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.subimages.image }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
+        tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}
         build-contexts: |
           ghcr.io/${{ github.repository_owner }}/${{ env.MAIN_IMAGE_NAME }}:proj-${{ env.LIBPROJ_VERSION }}-rust-${{ matrix.rust_version }}=oci-layout:///tmp/oci
         build-args: |
