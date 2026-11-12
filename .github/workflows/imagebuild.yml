@@ -26,7 +26,7 @@ jobs:
         # Include the 2 latest rust versions, plus all the MSRV from the following crates:
         #  - proj: https://github.com/georust/proj/blob/main/.github/workflows/test.yml
         #  - geo: https://github.com/georust/geo/blob/main/.github/workflows/test.yml
-        rust_version: ["1.88", "1.98", "1.99"]
+        rust_version: ["1.90", "1.98", "1.99"]
 
     steps:
     - name: Check out repository
@@ -91,7 +91,7 @@ jobs:
     strategy:
       matrix:
         image: [geo-ci, proj-ci, proj-ci-without-system-proj]
-        rust_version: ["1.88", "1.98", "1.99"]
+        rust_version: ["1.90", "1.98", "1.99"]
         include:
           - image: geo-ci
             testcmd: "git clone https://github.com/georust/geo && cd geo && cargo test --no-default-features && cargo test && cargo test --all-features"
